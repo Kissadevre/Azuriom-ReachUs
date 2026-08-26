@@ -1,0 +1,16 @@
+{
+    "id": "reachus",
+    "name": "Reach Us",
+    "description": "A secure contact form for guests with administrative message management.",
+    "version": "1.0.0",
+    "url": "https://zibuu.net/",
+    "authors": [
+        "Kissadere",
+        "Zibuu"
+    ],
+    "azuriom_api": "1.2.0",
+    "providers": [
+        "\\Azuriom\\Plugin\\ReachUs\\Providers\\ReachUsServiceProvider",
+        "\\Azuriom\\Plugin\\ReachUs\\Providers\\RouteServiceProvider"
+    ]
+}
