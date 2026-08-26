@@ -3,6 +3,7 @@
 namespace Azuriom\Plugin\ReachUs\Tests\Feature;
 
 use Azuriom\Models\Setting;
+use Azuriom\Plugin\ReachUs\Middleware\RedirectAuthenticatedUsers;
 use Azuriom\Plugin\ReachUs\Providers\ReachUsServiceProvider;
 use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
 use Azuriom\Plugin\ReachUs\Tests\TestCase;
@@ -20,6 +21,7 @@ class ReachUsSecurityTest extends TestCase
         $route = $router->getRoutes()->getByName('reachus.store');
 
         $this->assertNotNull($route);
+        $this->assertContains(RedirectAuthenticatedUsers::class, $route->gatherMiddleware());
         $this->assertContains('throttle:reachus.contact', $route->gatherMiddleware());
         $this->assertContains('captcha', $route->gatherMiddleware());
     }
