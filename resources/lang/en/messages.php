@@ -8,9 +8,9 @@ return [
     ],
     'contact_fields' => [
         'whatsapp' => ['label' => 'WhatsApp number', 'help' => 'Enter 6 to 16 characters: digits only, with an optional + at the beginning.'],
-        'telegram' => ['label' => 'Telegram username', 'help' => 'Enter the username we should contact.'],
-        'email' => ['label' => 'Email address', 'help' => 'Enter a valid email address.'],
-        'discord' => ['label' => 'Discord username', 'help' => 'Enter your current Discord username.'],
+        'telegram' => ['label' => 'Telegram username', 'help' => 'Use letters, numbers, hyphens, and underscores only.'],
+        'email' => ['label' => 'Email address', 'help' => 'Use letters, numbers, @, hyphens, and underscores only.'],
+        'discord' => ['label' => 'Discord username', 'help' => 'Use letters, numbers, hyphens, and underscores only.'],
     ],
     'form' => [
         'name' => 'Name', 'name_help' => 'Letters and spaces only, up to 64 characters.',
@@ -26,6 +26,8 @@ return [
     'validation' => [
         'name_format' => 'The name may only contain letters and spaces.',
         'whatsapp_format' => 'The WhatsApp number must contain 6 to 16 characters: digits only, with an optional + at the beginning.',
+        'username_characters' => 'The username may only contain letters, numbers, hyphens, and underscores.',
+        'email_characters' => 'The email may only contain letters, numbers, @, hyphens, and underscores.',
         'attributes' => ['name' => 'name', 'contact_method' => 'contact method', 'contact_value' => 'contact details', 'reason' => 'reason'],
     ],
 ];

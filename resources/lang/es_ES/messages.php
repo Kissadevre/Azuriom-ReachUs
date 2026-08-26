@@ -8,9 +8,9 @@ return [
     ],
     'contact_fields' => [
         'whatsapp' => ['label' => 'Número de WhatsApp', 'help' => 'Introduce de 6 a 16 caracteres: solo dígitos y, opcionalmente, un + al inicio.'],
-        'telegram' => ['label' => 'Usuario de Telegram', 'help' => 'Introduce el usuario con el que debemos contactarte.'],
-        'email' => ['label' => 'Correo electrónico', 'help' => 'Introduce una dirección de correo válida.'],
-        'discord' => ['label' => 'Usuario de Discord', 'help' => 'Introduce tu nombre de usuario actual de Discord.'],
+        'telegram' => ['label' => 'Usuario de Telegram', 'help' => 'Utiliza solamente letras, números, guiones y guiones bajos.'],
+        'email' => ['label' => 'Correo electrónico', 'help' => 'Utiliza solamente letras, números, @, guiones y guiones bajos.'],
+        'discord' => ['label' => 'Usuario de Discord', 'help' => 'Utiliza solamente letras, números, guiones y guiones bajos.'],
     ],
     'form' => [
         'name' => 'Nombre', 'name_help' => 'Solo letras y espacios, hasta 64 caracteres.',
@@ -26,6 +26,8 @@ return [
     'validation' => [
         'name_format' => 'El nombre solo puede contener letras y espacios.',
         'whatsapp_format' => 'El número de WhatsApp debe contener de 6 a 16 caracteres: solo dígitos y, opcionalmente, un + al inicio.',
+        'username_characters' => 'El usuario solo puede contener letras, números, guiones y guiones bajos.',
+        'email_characters' => 'El correo solo puede contener letras, números, @, guiones y guiones bajos.',
         'attributes' => ['name' => 'nombre', 'contact_method' => 'medio de contacto', 'contact_value' => 'datos de contacto', 'reason' => 'motivo'],
     ],
 ];

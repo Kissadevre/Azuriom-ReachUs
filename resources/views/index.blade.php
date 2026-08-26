@@ -92,6 +92,10 @@
 
                 if (selected === 'whatsapp') {
                     input.setAttribute('pattern', '(?:[0-9]{6,16}|\\+[0-9]{5,15})');
+                } else if (selected === 'discord' || selected === 'telegram') {
+                    input.setAttribute('pattern', '[A-Za-z0-9_-]+');
+                } else if (selected === 'email') {
+                    input.setAttribute('pattern', '[A-Za-z0-9@_-]+');
                 } else {
                     input.removeAttribute('pattern');
                 }
@@ -106,14 +110,18 @@
             });
 
             input.addEventListener('input', function () {
-                if (method.value !== 'whatsapp') {
-                    return;
+                const selected = method.value;
+
+                if (selected === 'whatsapp') {
+                    const hasLeadingPlus = input.value.startsWith('+');
+                    const digits = input.value.replace(/\D/g, '');
+
+                    input.value = ((hasLeadingPlus ? '+' : '') + digits).slice(0, 16);
+                } else if (selected === 'discord' || selected === 'telegram') {
+                    input.value = input.value.replace(/[^A-Za-z0-9_-]/g, '');
+                } else if (selected === 'email') {
+                    input.value = input.value.replace(/[^A-Za-z0-9@_-]/g, '');
                 }
-
-                const hasLeadingPlus = input.value.startsWith('+');
-                const digits = input.value.replace(/\D/g, '');
-
-                input.value = ((hasLeadingPlus ? '+' : '') + digits).slice(0, 16);
             });
 
             updateContactField();

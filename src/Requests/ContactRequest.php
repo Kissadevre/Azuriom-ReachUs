@@ -26,7 +26,14 @@ class ContactRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::when($this->input('contact_method') === ContactMessage::METHOD_EMAIL, ['email:rfc']),
+                Rule::when($this->input('contact_method') === ContactMessage::METHOD_EMAIL, [
+                    'email:rfc',
+                    'regex:/^[A-Za-z0-9@_-]+$/D',
+                ]),
+                Rule::when(in_array($this->input('contact_method'), [
+                    ContactMessage::METHOD_DISCORD,
+                    ContactMessage::METHOD_TELEGRAM,
+                ], true), ['regex:/^[A-Za-z0-9_-]+$/D']),
                 Rule::when($this->input('contact_method') === ContactMessage::METHOD_WHATSAPP, [
                     'max:16',
                     'regex:/^(?:[0-9]{6,16}|\+[0-9]{5,15})$/D',
@@ -40,7 +47,12 @@ class ContactRequest extends FormRequest
     {
         return [
             'name.regex' => trans('reachus::messages.validation.name_format'),
-            'contact_value.regex' => trans('reachus::messages.validation.whatsapp_format'),
+            'contact_value.regex' => match ($this->input('contact_method')) {
+                ContactMessage::METHOD_WHATSAPP => trans('reachus::messages.validation.whatsapp_format'),
+                ContactMessage::METHOD_EMAIL => trans('reachus::messages.validation.email_characters'),
+                ContactMessage::METHOD_DISCORD, ContactMessage::METHOD_TELEGRAM => trans('reachus::messages.validation.username_characters'),
+                default => trans('validation.regex'),
+            },
         ];
     }
 
