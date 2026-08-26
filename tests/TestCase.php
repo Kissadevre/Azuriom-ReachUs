@@ -57,6 +57,8 @@ abstract class TestCase extends BaseTestCase
         foreach ([
             '2014_10_12_000000_create_users_table.php',
             '2019_08_15_000000_create_roles_table.php',
+            '2019_08_12_000000_create_posts_table.php',
+            '2019_08_13_000000_create_pages_table.php',
             '2019_08_22_000000_create_settings_table.php',
             '2019_08_30_000000_create_permissions_table.php',
             '2020_05_01_000000_create_notifications_table.php',

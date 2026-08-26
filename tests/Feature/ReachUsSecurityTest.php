@@ -8,7 +8,9 @@ use Azuriom\Plugin\ReachUs\Providers\ReachUsServiceProvider;
 use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
 use Azuriom\Plugin\ReachUs\Tests\TestCase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 
 class ReachUsSecurityTest extends TestCase
 {
@@ -55,6 +57,21 @@ class ReachUsSecurityTest extends TestCase
         $this->assertContains('can:reachus.settings', $settings->gatherMiddleware());
     }
 
+    public function test_settings_form_offers_the_navbar_style_destination_types(): void
+    {
+        $view = file_get_contents(dirname(__DIR__, 2).'/resources/views/admin/settings.blade.php');
+
+        $this->assertStringContainsString('name="redirect_type"', $view);
+
+        foreach (ReachUsSettings::redirectTypes() as $type) {
+            $this->assertStringContainsString('data-redirect-field="'.$type.'"', $view);
+        }
+
+        $this->assertStringContainsString('name="redirect_page"', $view);
+        $this->assertStringContainsString('name="redirect_post"', $view);
+        $this->assertStringContainsString('name="redirect_plugin"', $view);
+    }
+
     public function test_rate_limiter_uses_current_setting_and_ip_address(): void
     {
         Setting::updateSettings(ReachUsSettings::RATE_LIMIT_KEY, 7);
@@ -73,14 +90,86 @@ class ReachUsSecurityTest extends TestCase
         $this->assertSame('reachus.contact|192.0.2.20', $limit->key);
     }
 
-    public function test_authenticated_redirect_is_restricted_to_a_local_path(): void
+    public function test_authenticated_redirect_preserves_the_legacy_local_path(): void
     {
         $settings = app(ReachUsSettings::class);
 
         Setting::updateSettings(ReachUsSettings::AUTHENTICATED_REDIRECT_KEY, '/support/tickets');
-        $this->assertSame('/support/tickets', $settings->authenticatedRedirect());
 
-        Setting::updateSettings(ReachUsSettings::AUTHENTICATED_REDIRECT_KEY, '//evil.example');
+        $this->assertSame('link', $settings->authenticatedRedirectType());
+        $this->assertSame('/support/tickets', $settings->authenticatedRedirectValue());
+        $this->assertSame('/support/tickets', $settings->authenticatedRedirect());
+    }
+
+    public function test_authenticated_redirect_resolves_navbar_style_destination_types(): void
+    {
+        $settings = app(ReachUsSettings::class);
+
+        Setting::updateSettings([
+            ReachUsSettings::AUTHENTICATED_REDIRECT_TYPE_KEY => 'link',
+            ReachUsSettings::AUTHENTICATED_REDIRECT_VALUE_KEY => 'https://example.com/support',
+        ]);
+        $this->assertSame('https://example.com/support', $settings->authenticatedRedirect());
+
+        DB::table('pages')->insert([
+            'id' => 1, 'title' => 'Contact members', 'description' => 'Members',
+            'slug' => 'members-contact', 'content' => 'Content', 'is_enabled' => true,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+        Setting::updateSettings([
+            ReachUsSettings::AUTHENTICATED_REDIRECT_TYPE_KEY => 'page',
+            ReachUsSettings::AUTHENTICATED_REDIRECT_VALUE_KEY => 'members-contact',
+        ]);
+        $this->assertSame(route('pages.show', 'members-contact'), $settings->authenticatedRedirect());
+
+        DB::table('roles')->insert([
+            'id' => 1, 'name' => 'Member', 'color' => 'ffffff', 'power' => 0,
+            'is_admin' => false, 'created_at' => now(), 'updated_at' => now(),
+        ]);
+        DB::table('users')->insert([
+            'id' => 1, 'name' => 'Author', 'email' => 'author@example.com', 'password' => 'unused',
+            'role_id' => 1, 'created_at' => now(), 'updated_at' => now(),
+        ]);
+        DB::table('posts')->insert([
+            'id' => 1, 'author_id' => 1, 'title' => 'Member news', 'description' => 'News',
+            'slug' => 'member-news', 'content' => 'Content', 'is_pinned' => false,
+            'published_at' => now()->subMinute(), 'created_at' => now(), 'updated_at' => now(),
+        ]);
+        Setting::updateSettings([
+            ReachUsSettings::AUTHENTICATED_REDIRECT_TYPE_KEY => 'post',
+            ReachUsSettings::AUTHENTICATED_REDIRECT_VALUE_KEY => 'member-news',
+        ]);
+        $this->assertSame(route('posts.show', 'member-news'), $settings->authenticatedRedirect());
+
+        Setting::updateSettings([
+            ReachUsSettings::AUTHENTICATED_REDIRECT_TYPE_KEY => 'posts',
+            ReachUsSettings::AUTHENTICATED_REDIRECT_VALUE_KEY => '#',
+        ]);
+        $this->assertSame(route('posts.index'), $settings->authenticatedRedirect());
+
+        Route::get('/member-area', fn () => 'ok')->name('member-area.index');
+        Route::getRoutes()->refreshNameLookups();
+        Setting::updateSettings([
+            ReachUsSettings::AUTHENTICATED_REDIRECT_TYPE_KEY => 'plugin',
+            ReachUsSettings::AUTHENTICATED_REDIRECT_VALUE_KEY => 'member-area.index',
+        ]);
+        $this->assertSame(route('member-area.index'), $settings->authenticatedRedirect());
+    }
+
+    public function test_authenticated_redirect_falls_back_when_the_destination_is_unsafe_or_missing(): void
+    {
+        $settings = app(ReachUsSettings::class);
+
+        Setting::updateSettings([
+            ReachUsSettings::AUTHENTICATED_REDIRECT_TYPE_KEY => 'link',
+            ReachUsSettings::AUTHENTICATED_REDIRECT_VALUE_KEY => '//evil.example',
+        ]);
+        $this->assertSame('/', $settings->authenticatedRedirect());
+
+        Setting::updateSettings([
+            ReachUsSettings::AUTHENTICATED_REDIRECT_TYPE_KEY => 'plugin',
+            ReachUsSettings::AUTHENTICATED_REDIRECT_VALUE_KEY => 'reachus.index',
+        ]);
         $this->assertSame('/', $settings->authenticatedRedirect());
     }
 }
