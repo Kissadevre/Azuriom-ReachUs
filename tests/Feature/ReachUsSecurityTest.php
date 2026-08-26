@@ -3,6 +3,7 @@
 namespace Azuriom\Plugin\ReachUs\Tests\Feature;
 
 use Azuriom\Models\Setting;
+use Azuriom\Plugin\ReachUs\Middleware\EnsureContactFormAvailable;
 use Azuriom\Plugin\ReachUs\Middleware\RedirectAuthenticatedUsers;
 use Azuriom\Plugin\ReachUs\Providers\ReachUsServiceProvider;
 use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
@@ -23,9 +24,16 @@ class ReachUsSecurityTest extends TestCase
         $route = $router->getRoutes()->getByName('reachus.store');
 
         $this->assertNotNull($route);
-        $this->assertContains(RedirectAuthenticatedUsers::class, $route->gatherMiddleware());
-        $this->assertContains('throttle:reachus.contact', $route->gatherMiddleware());
-        $this->assertContains('captcha', $route->gatherMiddleware());
+        $middleware = $route->gatherMiddleware();
+
+        $this->assertContains(RedirectAuthenticatedUsers::class, $middleware);
+        $this->assertContains(EnsureContactFormAvailable::class, $middleware);
+        $this->assertContains('throttle:reachus.contact', $middleware);
+        $this->assertContains('captcha', $middleware);
+        $this->assertTrue(
+            array_search(RedirectAuthenticatedUsers::class, $middleware, true)
+                < array_search(EnsureContactFormAvailable::class, $middleware, true),
+        );
     }
 
     public function test_form_uses_the_shared_azuriom_captcha_element(): void
@@ -40,6 +48,8 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString("input.setAttribute('pattern', '[A-Za-z0-9@_-]+')", $view);
         $this->assertStringContainsString('name="terms_accepted"', $view);
         $this->assertStringContainsString('@if($termsRequired)', $view);
+        $this->assertStringContainsString('@if(! $submissionsEnabled)', $view);
+        $this->assertStringContainsString('reachus-unavailable-state', $view);
     }
 
     public function test_polished_views_share_isolated_styles_and_responsive_controls(): void
@@ -101,7 +111,30 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString('name="terms_enabled"', $view);
         $this->assertStringContainsString('name="terms_text"', $view);
         $this->assertStringContainsString('name="terms_url"', $view);
+        $this->assertStringContainsString('name="submissions_enabled"', $view);
         $this->assertStringContainsString('updateTermsFields', $view);
+    }
+
+    public function test_guest_submissions_can_be_temporarily_disabled(): void
+    {
+        $settings = app(ReachUsSettings::class);
+
+        $this->assertTrue($settings->submissionsEnabled());
+
+        Setting::updateSettings(ReachUsSettings::SUBMISSIONS_ENABLED_KEY, false);
+
+        $this->assertFalse($settings->submissionsEnabled());
+
+        Route::get('/reachus-test-index', fn () => 'form')->name('reachus.index');
+        Route::getRoutes()->refreshNameLookups();
+
+        $middleware = app(EnsureContactFormAvailable::class);
+        $response = $middleware->handle(
+            Request::create('/reachus', 'POST'),
+            fn () => response('submitted'),
+        );
+
+        $this->assertTrue($response->isRedirect(route('reachus.index')));
     }
 
     public function test_terms_settings_require_complete_and_safe_configuration(): void

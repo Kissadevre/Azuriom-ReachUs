@@ -10,6 +10,10 @@ return [
         'protected' => 'Envío protegido',
         'direct_reply' => 'Respuesta por tu medio preferido',
     ],
+    'unavailable' => [
+        'title' => 'El contacto no está disponible temporalmente',
+        'description' => 'Por el momento no es posible contactarnos. Inténtalo de nuevo más tarde.',
+    ],
     'sections' => [
         'identity' => 'Cuéntanos quién eres',
         'identity_help' => 'Utiliza el nombre con el que debemos dirigirnos a ti.',

@@ -34,12 +34,19 @@
                     </header>
 
                     <div class="reachus-form-body">
-                        @error('form')
-                            <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
-                                <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
-                                <span>{{ $message }}</span>
+                        @if(! $submissionsEnabled)
+                            <div class="reachus-unavailable-state" role="status">
+                                <span class="reachus-unavailable-icon"><i class="bi bi-clock-history" aria-hidden="true"></i></span>
+                                <h2>{{ trans('reachus::messages.unavailable.title') }}</h2>
+                                <p>{{ trans('reachus::messages.unavailable.description') }}</p>
                             </div>
-                        @enderror
+                        @else
+                            @error('form')
+                                <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                                    <span>{{ $message }}</span>
+                                </div>
+                            @enderror
 
                         <form method="POST" action="{{ route('reachus.store') }}" id="captcha-form">
                             @csrf
@@ -151,6 +158,7 @@
                                 </button>
                             </div>
                         </form>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -158,8 +166,9 @@
     </div>
 @endsection
 
-@push('footer-scripts')
-    <script>
+@if($submissionsEnabled)
+    @push('footer-scripts')
+        <script>
         document.addEventListener('DOMContentLoaded', function () {
             const methodInputs = document.querySelectorAll('input[name="contact_method"]');
             const group = document.getElementById('contactValueGroup');
@@ -237,5 +246,6 @@
             updateContactField();
             updateReasonCounter();
         });
-    </script>
-@endpush
+        </script>
+    @endpush
+@endif

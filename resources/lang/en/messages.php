@@ -10,6 +10,10 @@ return [
         'protected' => 'Protected submission',
         'direct_reply' => 'Reply through your preferred channel',
     ],
+    'unavailable' => [
+        'title' => 'Contact is temporarily unavailable',
+        'description' => 'It is not possible to contact us at this time. Please try again later.',
+    ],
     'sections' => [
         'identity' => 'Tell us who you are',
         'identity_help' => 'Use the name we should address you by.',

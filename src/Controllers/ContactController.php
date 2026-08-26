@@ -22,6 +22,7 @@ class ContactController extends Controller
         }
 
         return view('reachus::index', [
+            'submissionsEnabled' => $settings->submissionsEnabled(),
             'termsRequired' => $settings->termsRequired(),
             'termsText' => $settings->termsText(),
             'termsUrl' => $settings->termsUrl(),

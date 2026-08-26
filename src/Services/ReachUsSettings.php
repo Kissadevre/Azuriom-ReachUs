@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 class ReachUsSettings
 {
     public const RATE_LIMIT_KEY = 'reachus.rate_limit';
+    public const SUBMISSIONS_ENABLED_KEY = 'reachus.submissions_enabled';
     public const AUTHENTICATED_REDIRECT_KEY = 'reachus.authenticated_redirect';
     public const AUTHENTICATED_REDIRECT_TYPE_KEY = 'reachus.authenticated_redirect_type';
     public const AUTHENTICATED_REDIRECT_VALUE_KEY = 'reachus.authenticated_redirect_value';
@@ -26,6 +27,11 @@ class ReachUsSettings
     public function rateLimit(): int
     {
         return max(1, min(100, (int) setting(self::RATE_LIMIT_KEY, self::DEFAULT_RATE_LIMIT)));
+    }
+
+    public function submissionsEnabled(): bool
+    {
+        return filter_var(setting(self::SUBMISSIONS_ENABLED_KEY, true), FILTER_VALIDATE_BOOL);
     }
 
     public function termsEnabled(): bool

@@ -27,6 +27,8 @@ return [
         'description' => 'Configure form protection and the experience for authenticated visitors.',
         'security_title' => 'Form protection',
         'security_description' => 'Control submission frequency and the acknowledgement guests must provide.',
+        'submissions_enabled' => 'Accept guest submissions',
+        'submissions_enabled_help' => 'Turn this off to temporarily replace the guest form with an unavailable notice. Authenticated visitor redirects remain active.',
         'rate_limit' => 'Submission rate limit',
         'requests_per_minute' => 'requests per minute',
         'rate_limit_help' => 'Maximum submission attempts allowed from one IP address per minute (1–100).',

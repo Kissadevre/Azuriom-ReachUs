@@ -8,6 +8,7 @@ Reach Us is an Azuriom plugin by Kissadere and Zibuu that gives unauthenticated 
 - Conditional server-side validation and a 64-character, letters-only name field.
 - Native Azuriom CAPTCHA integration.
 - Configurable per-IP submission rate limit.
+- Temporary guest-form closure with a friendly unavailable notice and server-side submission blocking.
 - Optional server-enforced acceptance checkbox with configurable terms or privacy-policy link.
 - Navbar-style authenticated visitor redirect supporting external links, pages, posts, the posts list, and plugin routes.
 - Permission-protected response inbox with read status and deletion.

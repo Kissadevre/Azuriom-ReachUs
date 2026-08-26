@@ -20,6 +20,7 @@ class SettingController extends Controller
     {
         return view('reachus::admin.settings', [
             'rateLimit' => $settings->rateLimit(),
+            'submissionsEnabled' => $settings->submissionsEnabled(),
             'termsEnabled' => $settings->termsEnabled(),
             'termsText' => $settings->termsText(),
             'termsUrl' => $settings->termsUrl(),
@@ -37,6 +38,7 @@ class SettingController extends Controller
         $pluginRoutes = $this->pluginRoutes();
         $validated = $request->validate([
             'rate_limit' => ['required', 'regex:/^[0-9]+$/D', 'integer', 'min:1', 'max:100'],
+            'submissions_enabled' => ['required', 'boolean'],
             'terms_enabled' => ['required', 'boolean'],
             'terms_text' => ['required_if:terms_enabled,1', 'nullable', 'string', 'max:200'],
             'terms_url' => [
@@ -81,6 +83,7 @@ class SettingController extends Controller
 
         Setting::updateSettings([
             ReachUsSettings::RATE_LIMIT_KEY => (int) $validated['rate_limit'],
+            ReachUsSettings::SUBMISSIONS_ENABLED_KEY => (bool) $validated['submissions_enabled'],
             ReachUsSettings::TERMS_ENABLED_KEY => (bool) $validated['terms_enabled'],
             ReachUsSettings::TERMS_TEXT_KEY => $validated['terms_text'] ?? '',
             ReachUsSettings::TERMS_URL_KEY => $validated['terms_url'] ?? '',

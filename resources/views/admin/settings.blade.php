@@ -33,6 +33,22 @@
                 </div>
                 <div class="card-body p-4">
                     <div class="reachus-admin-section">
+                        <div class="reachus-setting-switch">
+                            <div>
+                                <label class="form-label fw-semibold mb-1" for="submissionsEnabledInput">{{ trans('reachus::admin.settings.submissions_enabled') }}</label>
+                                <div class="form-text mt-0">{{ trans('reachus::admin.settings.submissions_enabled_help') }}</div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input type="hidden" name="submissions_enabled" value="0">
+                                <input class="form-check-input @error('submissions_enabled') is-invalid @enderror" type="checkbox" role="switch" id="submissionsEnabledInput" name="submissions_enabled" value="1" @checked(old('submissions_enabled', $submissionsEnabled))>
+                            </div>
+                        </div>
+                        @error('submissions_enabled')
+                            <span class="invalid-feedback d-block" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
+                    </div>
+
+                    <div class="reachus-admin-section">
                         <div class="row align-items-center g-3">
                             <div class="col-lg-5">
                                 <label class="form-label fw-semibold mb-1" for="rateLimitInput">{{ trans('reachus::admin.settings.rate_limit') }}</label>

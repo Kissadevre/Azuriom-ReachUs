@@ -27,6 +27,8 @@ return [
         'description' => 'Configura la protección del formulario y la experiencia de los visitantes autenticados.',
         'security_title' => 'Protección del formulario',
         'security_description' => 'Controla la frecuencia de envío y la aceptación que deben proporcionar los invitados.',
+        'submissions_enabled' => 'Aceptar envíos de invitados',
+        'submissions_enabled_help' => 'Desactiva esta opción para sustituir temporalmente el formulario por un aviso de indisponibilidad. Las redirecciones de visitantes autenticados seguirán activas.',
         'rate_limit' => 'Límite de envíos',
         'requests_per_minute' => 'solicitudes por minuto',
         'rate_limit_help' => 'Máximo de intentos permitidos desde una dirección IP por minuto (1–100).',
