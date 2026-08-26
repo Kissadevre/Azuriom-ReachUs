@@ -8,3 +8,7 @@
 
 # Composer
 /vendor/
+
+# Test runtime
+/tests/cache/*.php
+.phpunit.result.cache
