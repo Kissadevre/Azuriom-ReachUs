@@ -51,6 +51,46 @@
                         </div>
                     </div>
 
+                    <div class="reachus-admin-section">
+                        <div class="reachus-setting-switch">
+                            <div>
+                                <label class="form-label fw-semibold mb-1" for="termsEnabledInput">{{ trans('reachus::admin.settings.terms_enabled') }}</label>
+                                <div class="form-text mt-0">{{ trans('reachus::admin.settings.terms_enabled_help') }}</div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input type="hidden" name="terms_enabled" value="0">
+                                <input class="form-check-input @error('terms_enabled') is-invalid @enderror" type="checkbox" role="switch" id="termsEnabledInput" name="terms_enabled" value="1" @checked(old('terms_enabled', $termsEnabled))>
+                            </div>
+                        </div>
+                        @error('terms_enabled')
+                            <span class="invalid-feedback d-block" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
+
+                        <div class="reachus-terms-settings mt-3" id="termsConfiguration" @if(! old('terms_enabled', $termsEnabled)) hidden @endif>
+                            <div class="row g-3">
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold" for="termsTextInput">{{ trans('reachus::admin.settings.terms_text') }}</label>
+                                    <input type="text" class="form-control @error('terms_text') is-invalid @enderror" id="termsTextInput" name="terms_text" value="{{ old('terms_text', $termsText) }}" maxlength="200" placeholder="{{ trans('reachus::admin.settings.terms_text_placeholder') }}">
+                                    @error('terms_text')
+                                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                    @enderror
+                                    <div class="form-text">{{ trans('reachus::admin.settings.terms_text_help') }}</div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold" for="termsUrlInput">{{ trans('reachus::admin.settings.terms_url') }}</label>
+                                    <div class="input-group @error('terms_url') has-validation @enderror">
+                                        <span class="input-group-text"><i class="bi bi-link-45deg" aria-hidden="true"></i></span>
+                                        <input type="text" class="form-control @error('terms_url') is-invalid @enderror" id="termsUrlInput" name="terms_url" value="{{ old('terms_url', $termsUrl) }}" maxlength="2048" placeholder="https://example.com/privacy">
+                                        @error('terms_url')
+                                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                        @enderror
+                                    </div>
+                                    <div class="form-text">{{ trans('reachus::admin.settings.terms_url_help') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="alert alert-info d-flex gap-2 align-items-start mt-3 mb-0" role="alert">
                         <i class="bi bi-patch-check-fill mt-1" aria-hidden="true"></i>
                         <div>
@@ -163,6 +203,9 @@
         document.addEventListener('DOMContentLoaded', function () {
             const typeSelect = document.getElementById('redirectTypeSelect');
             const fields = document.querySelectorAll('[data-redirect-field]');
+            const termsEnabled = document.getElementById('termsEnabledInput');
+            const termsConfiguration = document.getElementById('termsConfiguration');
+            const termsFields = termsConfiguration.querySelectorAll('input');
 
             function updateRedirectFields() {
                 fields.forEach(function (field) {
@@ -176,8 +219,17 @@
                 });
             }
 
+            function updateTermsFields() {
+                termsConfiguration.hidden = ! termsEnabled.checked;
+                termsFields.forEach(function (field) {
+                    field.required = termsEnabled.checked;
+                });
+            }
+
             typeSelect.addEventListener('change', updateRedirectFields);
+            termsEnabled.addEventListener('change', updateTermsFields);
             updateRedirectFields();
+            updateTermsFields();
         });
     </script>
 @endpush

@@ -31,6 +31,7 @@ return [
         'name' => 'Name', 'name_help' => 'Letters and spaces only, up to 64 characters.',
         'contact_method' => 'Preferred contact method', 'choose_method' => 'Choose a contact method',
         'contact_value' => 'Contact details', 'reason' => 'Reason for contacting us',
+        'terms_prefix' => 'I have read and accept the',
         'submit' => 'Send message',
         'secure_note' => 'Your submission is protected by our anti-abuse controls.',
         'sent' => 'Your message was sent successfully. We will contact you soon.',
@@ -44,6 +45,7 @@ return [
         'whatsapp_format' => 'The WhatsApp number must contain 6 to 16 characters: digits only, with an optional + at the beginning.',
         'username_characters' => 'The username may only contain letters, numbers, hyphens, and underscores.',
         'email_characters' => 'The email may only contain letters, numbers, @, hyphens, and underscores.',
-        'attributes' => ['name' => 'name', 'contact_method' => 'contact method', 'contact_value' => 'contact details', 'reason' => 'reason'],
+        'terms_accepted' => 'You must accept the terms or privacy policy before sending your message.',
+        'attributes' => ['name' => 'name', 'contact_method' => 'contact method', 'contact_value' => 'contact details', 'reason' => 'reason', 'terms_accepted' => 'terms and conditions'],
     ],
 ];

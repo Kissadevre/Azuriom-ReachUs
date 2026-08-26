@@ -31,6 +31,7 @@ return [
         'name' => 'Nombre', 'name_help' => 'Solo letras y espacios, hasta 64 caracteres.',
         'contact_method' => 'Medio de contacto preferido', 'choose_method' => 'Selecciona un medio de contacto',
         'contact_value' => 'Datos de contacto', 'reason' => 'Motivo de contacto',
+        'terms_prefix' => 'He leído y acepto la',
         'submit' => 'Enviar mensaje',
         'secure_note' => 'Tu envío está protegido por nuestros controles contra abusos.',
         'sent' => 'Tu mensaje se envió correctamente. Nos pondremos en contacto contigo pronto.',
@@ -44,6 +45,7 @@ return [
         'whatsapp_format' => 'El número de WhatsApp debe contener de 6 a 16 caracteres: solo dígitos y, opcionalmente, un + al inicio.',
         'username_characters' => 'El usuario solo puede contener letras, números, guiones y guiones bajos.',
         'email_characters' => 'El correo solo puede contener letras, números, @, guiones y guiones bajos.',
-        'attributes' => ['name' => 'nombre', 'contact_method' => 'medio de contacto', 'contact_value' => 'datos de contacto', 'reason' => 'motivo'],
+        'terms_accepted' => 'Debes aceptar los términos o la política de privacidad antes de enviar tu mensaje.',
+        'attributes' => ['name' => 'nombre', 'contact_method' => 'medio de contacto', 'contact_value' => 'datos de contacto', 'reason' => 'motivo', 'terms_accepted' => 'términos y condiciones'],
     ],
 ];

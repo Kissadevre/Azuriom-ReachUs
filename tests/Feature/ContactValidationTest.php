@@ -2,7 +2,9 @@
 
 namespace Azuriom\Plugin\ReachUs\Tests\Feature;
 
+use Azuriom\Models\Setting;
 use Azuriom\Plugin\ReachUs\Requests\ContactRequest;
+use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
 use Azuriom\Plugin\ReachUs\Tests\TestCase;
 use Illuminate\Support\Facades\Validator;
 
@@ -105,6 +107,27 @@ class ContactValidationTest extends TestCase
                 'contact_value' => $email,
             ]))->fails(), $email.' should be invalid.');
         }
+    }
+
+    public function test_terms_acceptance_is_required_only_when_enabled(): void
+    {
+        $this->assertFalse($this->validator($this->validData())->fails());
+
+        Setting::updateSettings([
+            ReachUsSettings::TERMS_ENABLED_KEY => true,
+            ReachUsSettings::TERMS_TEXT_KEY => 'Privacy policy',
+            ReachUsSettings::TERMS_URL_KEY => '/privacy',
+        ]);
+
+        $missing = $this->validator($this->validData());
+        $rejected = $this->validator($this->validData(['terms_accepted' => '0']));
+        $accepted = $this->validator($this->validData(['terms_accepted' => '1']));
+
+        $this->assertTrue($missing->fails());
+        $this->assertArrayHasKey('terms_accepted', $missing->errors()->toArray());
+        $this->assertTrue($rejected->fails());
+        $this->assertArrayHasKey('terms_accepted', $rejected->errors()->toArray());
+        $this->assertFalse($accepted->fails());
     }
 
     private function validator(array $data): \Illuminate\Contracts\Validation\Validator

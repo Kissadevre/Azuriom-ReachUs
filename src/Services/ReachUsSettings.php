@@ -12,6 +12,9 @@ class ReachUsSettings
     public const AUTHENTICATED_REDIRECT_KEY = 'reachus.authenticated_redirect';
     public const AUTHENTICATED_REDIRECT_TYPE_KEY = 'reachus.authenticated_redirect_type';
     public const AUTHENTICATED_REDIRECT_VALUE_KEY = 'reachus.authenticated_redirect_value';
+    public const TERMS_ENABLED_KEY = 'reachus.terms_enabled';
+    public const TERMS_TEXT_KEY = 'reachus.terms_text';
+    public const TERMS_URL_KEY = 'reachus.terms_url';
     public const DEFAULT_RATE_LIMIT = 5;
     public const DEFAULT_AUTHENTICATED_REDIRECT = '/';
     public const DEFAULT_AUTHENTICATED_REDIRECT_TYPE = 'link';
@@ -23,6 +26,32 @@ class ReachUsSettings
     public function rateLimit(): int
     {
         return max(1, min(100, (int) setting(self::RATE_LIMIT_KEY, self::DEFAULT_RATE_LIMIT)));
+    }
+
+    public function termsEnabled(): bool
+    {
+        return filter_var(setting(self::TERMS_ENABLED_KEY, false), FILTER_VALIDATE_BOOL);
+    }
+
+    public function termsText(): string
+    {
+        $text = setting(self::TERMS_TEXT_KEY, '');
+
+        return is_string($text) ? trim($text) : '';
+    }
+
+    public function termsUrl(): string
+    {
+        $url = setting(self::TERMS_URL_KEY, '');
+
+        return is_string($url) ? trim($url) : '';
+    }
+
+    public function termsRequired(): bool
+    {
+        return $this->termsEnabled()
+            && $this->termsText() !== ''
+            && self::isAllowedLink($this->termsUrl());
     }
 
     public function authenticatedRedirectType(): string

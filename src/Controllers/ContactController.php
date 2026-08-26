@@ -21,7 +21,11 @@ class ContactController extends Controller
             return redirect()->to($settings->authenticatedRedirect());
         }
 
-        return view('reachus::index');
+        return view('reachus::index', [
+            'termsRequired' => $settings->termsRequired(),
+            'termsText' => $settings->termsText(),
+            'termsUrl' => $settings->termsUrl(),
+        ]);
     }
 
     public function store(
@@ -34,7 +38,9 @@ class ContactController extends Controller
             return redirect()->to($settings->authenticatedRedirect());
         }
 
-        $message = ContactMessage::create($request->validated());
+        $message = ContactMessage::create($request->safe()->only([
+            'name', 'contact_method', 'contact_value', 'reason',
+        ]));
         $notifications->send($message);
 
         return to_route('reachus.index')

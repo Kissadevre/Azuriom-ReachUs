@@ -38,6 +38,8 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString("input.maxLength = selected === 'whatsapp' ? 16 : 255", $view);
         $this->assertStringContainsString("input.setAttribute('pattern', '[A-Za-z0-9_-]+')", $view);
         $this->assertStringContainsString("input.setAttribute('pattern', '[A-Za-z0-9@_-]+')", $view);
+        $this->assertStringContainsString('name="terms_accepted"', $view);
+        $this->assertStringContainsString('@if($termsRequired)', $view);
     }
 
     public function test_polished_views_share_isolated_styles_and_responsive_controls(): void
@@ -96,6 +98,32 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString('name="redirect_page"', $view);
         $this->assertStringContainsString('name="redirect_post"', $view);
         $this->assertStringContainsString('name="redirect_plugin"', $view);
+        $this->assertStringContainsString('name="terms_enabled"', $view);
+        $this->assertStringContainsString('name="terms_text"', $view);
+        $this->assertStringContainsString('name="terms_url"', $view);
+        $this->assertStringContainsString('updateTermsFields', $view);
+    }
+
+    public function test_terms_settings_require_complete_and_safe_configuration(): void
+    {
+        $settings = app(ReachUsSettings::class);
+
+        $this->assertFalse($settings->termsRequired());
+
+        Setting::updateSettings([
+            ReachUsSettings::TERMS_ENABLED_KEY => true,
+            ReachUsSettings::TERMS_TEXT_KEY => 'Privacy policy',
+            ReachUsSettings::TERMS_URL_KEY => 'https://example.com/privacy',
+        ]);
+
+        $this->assertTrue($settings->termsEnabled());
+        $this->assertSame('Privacy policy', $settings->termsText());
+        $this->assertSame('https://example.com/privacy', $settings->termsUrl());
+        $this->assertTrue($settings->termsRequired());
+
+        Setting::updateSettings(ReachUsSettings::TERMS_URL_KEY, '//example.com/privacy');
+
+        $this->assertFalse($settings->termsRequired());
     }
 
     public function test_rate_limiter_uses_current_setting_and_ip_address(): void

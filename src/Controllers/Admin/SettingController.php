@@ -20,6 +20,9 @@ class SettingController extends Controller
     {
         return view('reachus::admin.settings', [
             'rateLimit' => $settings->rateLimit(),
+            'termsEnabled' => $settings->termsEnabled(),
+            'termsText' => $settings->termsText(),
+            'termsUrl' => $settings->termsUrl(),
             'redirectTypes' => ReachUsSettings::redirectTypes(),
             'redirectType' => $settings->authenticatedRedirectType(),
             'redirectValue' => $settings->authenticatedRedirectValue(),
@@ -34,6 +37,16 @@ class SettingController extends Controller
         $pluginRoutes = $this->pluginRoutes();
         $validated = $request->validate([
             'rate_limit' => ['required', 'regex:/^[0-9]+$/D', 'integer', 'min:1', 'max:100'],
+            'terms_enabled' => ['required', 'boolean'],
+            'terms_text' => ['required_if:terms_enabled,1', 'nullable', 'string', 'max:200'],
+            'terms_url' => [
+                'required_if:terms_enabled,1', 'nullable', 'string', 'max:2048',
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if ($value !== null && ! ReachUsSettings::isAllowedLink($value)) {
+                        $fail(trans('reachus::admin.settings.terms_url_format'));
+                    }
+                },
+            ],
             'redirect_type' => ['required', Rule::in(ReachUsSettings::redirectTypes())],
             'redirect_link' => [
                 'required_if:redirect_type,link', 'nullable', 'string', 'max:2048',
@@ -68,6 +81,9 @@ class SettingController extends Controller
 
         Setting::updateSettings([
             ReachUsSettings::RATE_LIMIT_KEY => (int) $validated['rate_limit'],
+            ReachUsSettings::TERMS_ENABLED_KEY => (bool) $validated['terms_enabled'],
+            ReachUsSettings::TERMS_TEXT_KEY => $validated['terms_text'] ?? '',
+            ReachUsSettings::TERMS_URL_KEY => $validated['terms_url'] ?? '',
             ReachUsSettings::AUTHENTICATED_REDIRECT_TYPE_KEY => $type,
             ReachUsSettings::AUTHENTICATED_REDIRECT_VALUE_KEY => $value,
             ReachUsSettings::AUTHENTICATED_REDIRECT_KEY => null,

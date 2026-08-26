@@ -125,6 +125,21 @@
                                 </div>
                             </section>
 
+                            @if($termsRequired)
+                                <div class="reachus-terms-panel">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input @error('terms_accepted') is-invalid @enderror" id="termsAcceptedInput" name="terms_accepted" value="1" @checked(old('terms_accepted')) required>
+                                        <label class="form-check-label" for="termsAcceptedInput">
+                                            {{ trans('reachus::messages.form.terms_prefix') }}
+                                            <a class="reachus-terms-link" href="{{ $termsUrl }}" target="_blank" rel="noopener noreferrer">{{ $termsText }}</a>.
+                                        </label>
+                                        @error('terms_accepted')
+                                            <span class="invalid-feedback d-block" role="alert"><strong>{{ $message }}</strong></span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            @endif
+
                             <div class="mt-4">
                                 @include('elements.captcha', ['center' => true])
                             </div>

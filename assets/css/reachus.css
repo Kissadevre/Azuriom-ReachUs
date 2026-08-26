@@ -444,6 +444,39 @@
     white-space: pre-wrap;
 }
 
+.reachus-terms-panel,
+.reachus-terms-settings {
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .75rem;
+    background: rgba(var(--bs-primary-rgb), .035);
+}
+
+.reachus-terms-panel {
+    margin-top: 1.5rem;
+}
+
+.reachus-terms-panel .form-check-input {
+    margin-top: .25rem;
+}
+
+.reachus-terms-link {
+    font-weight: 600;
+}
+
+.reachus-setting-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.reachus-setting-switch .form-switch .form-check-input {
+    width: 2.6rem;
+    height: 1.35rem;
+    margin-left: 0;
+}
+
 .reachus-destination-panel {
     border: 1px solid var(--bs-border-color);
     border-radius: .75rem;
