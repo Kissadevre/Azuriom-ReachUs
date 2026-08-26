@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('reachus_messages', function (Blueprint $table) {
+        Schema::create('reachus_contact_messages', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name', 64);
             $table->string('contact_method', 20);
@@ -22,6 +22,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('reachus_messages');
+        Schema::dropIfExists('reachus_contact_messages');
     }
 };

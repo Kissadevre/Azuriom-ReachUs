@@ -43,6 +43,13 @@ class ContactRequest extends FormRequest
 
     public function attributes(): array
     {
-        return trans('reachus::messages.validation.attributes');
+        $attributes = trans('reachus::messages.validation.attributes');
+
+        return is_array($attributes) ? $attributes : [
+            'name' => 'name',
+            'contact_method' => 'contact method',
+            'contact_value' => 'contact details',
+            'reason' => 'reason',
+        ];
     }
 }
