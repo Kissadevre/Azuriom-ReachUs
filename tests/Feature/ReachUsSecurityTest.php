@@ -32,6 +32,8 @@ class ReachUsSecurityTest extends TestCase
 
         $this->assertStringContainsString('id="captcha-form"', $view);
         $this->assertStringContainsString("@include('elements.captcha', ['center' => true])", $view);
+        $this->assertStringContainsString("input.removeAttribute('pattern')", $view);
+        $this->assertStringContainsString("input.maxLength = selected === 'whatsapp' ? 16 : 255", $view);
     }
 
     public function test_administration_routes_enforce_section_permissions(): void

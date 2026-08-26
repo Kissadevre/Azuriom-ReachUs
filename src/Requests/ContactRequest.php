@@ -27,7 +27,10 @@ class ContactRequest extends FormRequest
                 'string',
                 'max:255',
                 Rule::when($this->input('contact_method') === ContactMessage::METHOD_EMAIL, ['email:rfc']),
-                Rule::when($this->input('contact_method') === ContactMessage::METHOD_WHATSAPP, ['regex:/^[0-9]{6,20}$/D']),
+                Rule::when($this->input('contact_method') === ContactMessage::METHOD_WHATSAPP, [
+                    'max:16',
+                    'regex:/^(?:[0-9]{6,16}|\+[0-9]{5,15})$/D',
+                ]),
             ],
             'reason' => ['required', 'string', 'max:1000'],
         ];

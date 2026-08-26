@@ -7,7 +7,7 @@ return [
         'whatsapp' => 'WhatsApp', 'telegram' => 'Telegram', 'email' => 'Email', 'discord' => 'Discord',
     ],
     'contact_fields' => [
-        'whatsapp' => ['label' => 'WhatsApp number', 'help' => 'Enter digits only, including your country code.'],
+        'whatsapp' => ['label' => 'WhatsApp number', 'help' => 'Enter 6 to 16 characters: digits only, with an optional + at the beginning.'],
         'telegram' => ['label' => 'Telegram username', 'help' => 'Enter the username we should contact.'],
         'email' => ['label' => 'Email address', 'help' => 'Enter a valid email address.'],
         'discord' => ['label' => 'Discord username', 'help' => 'Enter your current Discord username.'],
@@ -25,7 +25,7 @@ return [
     ],
     'validation' => [
         'name_format' => 'The name may only contain letters and spaces.',
-        'whatsapp_format' => 'The WhatsApp number must contain between 6 and 20 digits.',
+        'whatsapp_format' => 'The WhatsApp number must contain 6 to 16 characters: digits only, with an optional + at the beginning.',
         'attributes' => ['name' => 'name', 'contact_method' => 'contact method', 'contact_value' => 'contact details', 'reason' => 'reason'],
     ],
 ];

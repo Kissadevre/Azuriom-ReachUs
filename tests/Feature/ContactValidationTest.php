@@ -12,6 +12,7 @@ class ContactValidationTest extends TestCase
     {
         foreach ([
             ['whatsapp', '5215512345678'],
+            ['whatsapp', '+5215512345678'],
             ['telegram', '@zibuu_support'],
             ['email', 'hello@example.com'],
             ['discord', 'zibuu.support'],
@@ -51,6 +52,23 @@ class ContactValidationTest extends TestCase
         $this->assertArrayHasKey('contact_value', $email->errors()->toArray());
         $this->assertTrue($whatsapp->fails());
         $this->assertArrayHasKey('contact_value', $whatsapp->errors()->toArray());
+    }
+
+    public function test_whatsapp_accepts_only_an_optional_leading_plus_and_up_to_16_characters(): void
+    {
+        foreach (['1234567890123456', '+123456789012345'] as $number) {
+            $this->assertFalse($this->validator($this->validData([
+                'contact_method' => 'whatsapp',
+                'contact_value' => $number,
+            ]))->fails(), $number.' should be valid.');
+        }
+
+        foreach (['12345A789', '123+456789', '12345678901234567', '+1234567890123456'] as $number) {
+            $this->assertTrue($this->validator($this->validData([
+                'contact_method' => 'whatsapp',
+                'contact_value' => $number,
+            ]))->fails(), $number.' should be invalid.');
+        }
     }
 
     private function validator(array $data): \Illuminate\Contracts\Validation\Validator

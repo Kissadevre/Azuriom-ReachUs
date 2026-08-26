@@ -84,9 +84,18 @@
 
                 group.hidden = ! configuration;
                 input.required = Boolean(configuration);
-                input.inputMode = selected === 'whatsapp' ? 'numeric' : 'text';
-                input.pattern = selected === 'whatsapp' ? '[0-9]{6,20}' : '';
+                input.type = selected === 'email' ? 'email' : 'text';
+                input.inputMode = selected === 'whatsapp' ? 'tel' : (selected === 'email' ? 'email' : 'text');
+                input.maxLength = selected === 'whatsapp' ? 16 : 255;
                 input.autocomplete = selected === 'email' ? 'email' : 'off';
+                input.title = configuration ? configuration.help : '';
+
+                if (selected === 'whatsapp') {
+                    input.setAttribute('pattern', '(?:[0-9]{6,16}|\\+[0-9]{5,15})');
+                } else {
+                    input.removeAttribute('pattern');
+                }
+
                 label.textContent = configuration ? configuration.label : @json(trans('reachus::messages.form.contact_value'));
                 help.textContent = configuration ? configuration.help : '';
             }
@@ -94,6 +103,17 @@
             method.addEventListener('change', function () {
                 input.value = '';
                 updateContactField();
+            });
+
+            input.addEventListener('input', function () {
+                if (method.value !== 'whatsapp') {
+                    return;
+                }
+
+                const hasLeadingPlus = input.value.startsWith('+');
+                const digits = input.value.replace(/\D/g, '');
+
+                input.value = ((hasLeadingPlus ? '+' : '') + digits).slice(0, 16);
             });
 
             updateContactField();

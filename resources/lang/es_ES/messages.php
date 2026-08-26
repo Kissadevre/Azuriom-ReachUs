@@ -7,7 +7,7 @@ return [
         'whatsapp' => 'WhatsApp', 'telegram' => 'Telegram', 'email' => 'Correo electrónico', 'discord' => 'Discord',
     ],
     'contact_fields' => [
-        'whatsapp' => ['label' => 'Número de WhatsApp', 'help' => 'Introduce solo dígitos, incluyendo el código de país.'],
+        'whatsapp' => ['label' => 'Número de WhatsApp', 'help' => 'Introduce de 6 a 16 caracteres: solo dígitos y, opcionalmente, un + al inicio.'],
         'telegram' => ['label' => 'Usuario de Telegram', 'help' => 'Introduce el usuario con el que debemos contactarte.'],
         'email' => ['label' => 'Correo electrónico', 'help' => 'Introduce una dirección de correo válida.'],
         'discord' => ['label' => 'Usuario de Discord', 'help' => 'Introduce tu nombre de usuario actual de Discord.'],
@@ -25,7 +25,7 @@ return [
     ],
     'validation' => [
         'name_format' => 'El nombre solo puede contener letras y espacios.',
-        'whatsapp_format' => 'El número de WhatsApp debe contener entre 6 y 20 dígitos.',
+        'whatsapp_format' => 'El número de WhatsApp debe contener de 6 a 16 caracteres: solo dígitos y, opcionalmente, un + al inicio.',
         'attributes' => ['name' => 'nombre', 'contact_method' => 'medio de contacto', 'contact_value' => 'datos de contacto', 'reason' => 'motivo'],
     ],
 ];
