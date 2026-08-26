@@ -20,6 +20,9 @@ return [
         'sent' => 'Your message was sent successfully. We will contact you soon.',
         'too_many_attempts' => 'You have sent too many requests. Please wait a minute and try again.',
     ],
+    'notifications' => [
+        'new_message' => 'New Reach Us response from :name.',
+    ],
     'validation' => [
         'name_format' => 'The name may only contain letters and spaces.',
         'whatsapp_format' => 'The WhatsApp number must contain between 6 and 20 digits.',

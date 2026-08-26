@@ -20,6 +20,9 @@ return [
         'sent' => 'Tu mensaje se envió correctamente. Nos pondremos en contacto contigo pronto.',
         'too_many_attempts' => 'Has enviado demasiadas solicitudes. Espera un minuto e inténtalo de nuevo.',
     ],
+    'notifications' => [
+        'new_message' => 'Nueva respuesta de Reach Us de :name.',
+    ],
     'validation' => [
         'name_format' => 'El nombre solo puede contener letras y espacios.',
         'whatsapp_format' => 'El número de WhatsApp debe contener entre 6 y 20 dígitos.',

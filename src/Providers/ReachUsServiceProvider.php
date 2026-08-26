@@ -3,6 +3,8 @@
 namespace Azuriom\Plugin\ReachUs\Providers;
 
 use Azuriom\Extensions\Plugin\BasePluginServiceProvider;
+use Azuriom\Models\ActionLog;
+use Azuriom\Models\Permission;
 use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -21,6 +23,23 @@ class ReachUsServiceProvider extends BasePluginServiceProvider
         $this->registerRouteDescriptions();
         $this->registerAdminNavigation();
         $this->registerRateLimiter();
+
+        Permission::registerPermissions([
+            'reachus.responses' => 'reachus::admin.permissions.responses',
+            'reachus.settings' => 'reachus::admin.permissions.settings',
+        ]);
+
+        ActionLog::registerLogs('reachus.responses.deleted', [
+            'icon' => 'trash',
+            'color' => 'danger',
+            'message' => 'reachus::admin.logs.response_deleted',
+        ]);
+
+        ActionLog::registerLogs('reachus.settings.updated', [
+            'icon' => 'sliders',
+            'color' => 'warning',
+            'message' => 'reachus::admin.logs.settings_updated',
+        ]);
     }
 
     /**
@@ -42,7 +61,25 @@ class ReachUsServiceProvider extends BasePluginServiceProvider
      */
     protected function adminNavigation(): array
     {
-        return [];
+        return [
+            'reachus' => [
+                'name' => trans('reachus::admin.title'),
+                'type' => 'dropdown',
+                'icon' => 'bi bi-chat-left-text',
+                'permission' => ['reachus.responses', 'reachus.settings'],
+                'route' => 'reachus.admin.*',
+                'items' => [
+                    'reachus.admin.responses.index' => [
+                        'name' => trans('reachus::admin.nav.responses'),
+                        'permission' => 'reachus.responses',
+                    ],
+                    'reachus.admin.settings' => [
+                        'name' => trans('reachus::admin.nav.settings'),
+                        'permission' => 'reachus.settings',
+                    ],
+                ],
+            ],
+        ];
     }
 
     protected function registerRateLimiter(): void
