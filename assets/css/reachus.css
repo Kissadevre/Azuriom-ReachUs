@@ -1,0 +1,492 @@
+.reachus-shell {
+    --reachus-radius: 1rem;
+    --reachus-soft-primary: rgba(var(--bs-primary-rgb), .1);
+    --reachus-soft-secondary: rgba(var(--bs-secondary-rgb), .08);
+}
+
+.reachus-surface {
+    overflow: hidden;
+    border: 1px solid rgba(var(--bs-primary-rgb), .12);
+    border-radius: var(--reachus-radius);
+    background: var(--bs-body-bg);
+    box-shadow: 0 .75rem 2.25rem rgba(0, 0, 0, .07);
+}
+
+.reachus-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+    border-bottom: 1px solid rgba(var(--bs-primary-rgb), .12);
+    background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), .15), rgba(var(--bs-info-rgb), .05));
+}
+
+.reachus-hero::after {
+    position: absolute;
+    width: 12rem;
+    height: 12rem;
+    top: -6rem;
+    right: -4rem;
+    border: 2rem solid rgba(var(--bs-primary-rgb), .06);
+    border-radius: 50%;
+    content: '';
+    pointer-events: none;
+}
+
+.reachus-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.reachus-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin-bottom: .65rem;
+    color: var(--bs-primary);
+    font-size: .76rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.reachus-hero-icon,
+.reachus-admin-icon,
+.reachus-section-icon,
+.reachus-stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    color: var(--bs-primary);
+    background: var(--reachus-soft-primary);
+}
+
+.reachus-hero-icon {
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-bottom: 1rem;
+    border-radius: .9rem;
+    font-size: 1.4rem;
+}
+
+.reachus-trust-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    margin-top: 1.25rem;
+}
+
+.reachus-trust-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .38rem .65rem;
+    border: 1px solid rgba(var(--bs-primary-rgb), .13);
+    border-radius: 999px;
+    color: var(--bs-secondary-color);
+    background: rgba(var(--bs-body-bg-rgb), .68);
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.reachus-form-body {
+    padding: 2rem;
+}
+
+.reachus-form-section + .reachus-form-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.reachus-section-heading {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+
+.reachus-section-icon {
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: .7rem;
+}
+
+.reachus-section-heading h2,
+.reachus-section-heading h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.reachus-method-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.reachus-method-option {
+    position: relative;
+}
+
+.reachus-method-card {
+    display: flex;
+    min-height: 6.75rem;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: .5rem;
+    padding: 1rem .65rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .8rem;
+    color: var(--bs-body-color);
+    background: var(--bs-body-bg);
+    cursor: pointer;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease, background-color .18s ease;
+}
+
+.reachus-method-card:hover {
+    border-color: rgba(var(--bs-primary-rgb), .5);
+    transform: translateY(-2px);
+}
+
+.reachus-method-card i {
+    color: var(--bs-primary);
+    font-size: 1.45rem;
+}
+
+.reachus-method-card span {
+    font-size: .86rem;
+    font-weight: 700;
+}
+
+.reachus-method-option input:checked + .reachus-method-card {
+    border-color: var(--bs-primary);
+    background: var(--reachus-soft-primary);
+    box-shadow: 0 0 0 .2rem rgba(var(--bs-primary-rgb), .1);
+}
+
+.reachus-method-option input:focus-visible + .reachus-method-card {
+    outline: 3px solid rgba(var(--bs-primary-rgb), .25);
+    outline-offset: 2px;
+}
+
+.reachus-input-wrap {
+    position: relative;
+}
+
+.reachus-input-wrap > .bi {
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    left: .9rem;
+    color: var(--bs-secondary-color);
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.reachus-input-wrap .form-control {
+    padding-left: 2.65rem;
+}
+
+.reachus-counter {
+    color: var(--bs-secondary-color);
+    font-size: .78rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.reachus-submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.reachus-submit-note {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    color: var(--bs-secondary-color);
+    font-size: .82rem;
+}
+
+.reachus-submit-row .btn {
+    min-width: 10rem;
+    border-radius: .7rem;
+    font-weight: 700;
+}
+
+.reachus-admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.reachus-admin-heading {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+}
+
+.reachus-admin-icon {
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: .8rem;
+    font-size: 1.2rem;
+}
+
+.reachus-admin-heading h1 {
+    margin-bottom: .2rem;
+    font-size: 1.45rem;
+}
+
+.reachus-admin-heading p {
+    margin: 0;
+    color: var(--bs-secondary-color);
+    font-size: .9rem;
+}
+
+.reachus-admin-card {
+    overflow: hidden;
+    border: 1px solid rgba(var(--bs-primary-rgb), .1);
+    border-radius: .9rem;
+    box-shadow: 0 .3rem 1.25rem rgba(0, 0, 0, .045);
+}
+
+.reachus-admin-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    background: rgba(var(--bs-primary-rgb), .035);
+}
+
+.reachus-admin-section {
+    padding: 1.25rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .8rem;
+    background: var(--bs-body-bg);
+}
+
+.reachus-admin-section + .reachus-admin-section {
+    margin-top: 1rem;
+}
+
+.reachus-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+    min-width: 18rem;
+}
+
+.reachus-stat {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .75rem .85rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .75rem;
+    background: var(--bs-body-bg);
+}
+
+.reachus-stat-icon {
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: .65rem;
+}
+
+.reachus-stat strong,
+.reachus-stat small {
+    display: block;
+}
+
+.reachus-stat strong {
+    line-height: 1.1;
+    font-size: 1.05rem;
+}
+
+.reachus-stat small {
+    margin-top: .15rem;
+    color: var(--bs-secondary-color);
+    font-size: .72rem;
+}
+
+.reachus-admin-table thead th {
+    padding-top: .8rem;
+    padding-bottom: .8rem;
+    border-bottom-width: 1px;
+    color: var(--bs-secondary-color);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.reachus-admin-table tbody td {
+    padding-top: .95rem;
+    padding-bottom: .95rem;
+}
+
+.reachus-unread-row {
+    box-shadow: inset .22rem 0 0 var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), .025);
+}
+
+.reachus-method-badge,
+.reachus-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .35rem .55rem;
+    border-radius: 999px;
+    font-size: .76rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.reachus-method-badge {
+    color: var(--bs-primary);
+    background: var(--reachus-soft-primary);
+}
+
+.reachus-status-badge.is-unread {
+    color: var(--bs-warning-text-emphasis);
+    background: var(--bs-warning-bg-subtle);
+}
+
+.reachus-status-badge.is-read {
+    color: var(--bs-secondary-color);
+    background: var(--reachus-soft-secondary);
+}
+
+.reachus-action-group {
+    display: inline-flex;
+    gap: .35rem;
+}
+
+.reachus-action-group .btn {
+    display: inline-flex;
+    width: 2.15rem;
+    height: 2.15rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: .55rem;
+}
+
+.reachus-empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.reachus-empty-state-icon {
+    display: inline-flex;
+    width: 3.5rem;
+    height: 3.5rem;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: .85rem;
+    border-radius: 1rem;
+    color: var(--bs-secondary-color);
+    background: var(--reachus-soft-secondary);
+    font-size: 1.45rem;
+}
+
+.reachus-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.reachus-detail-item {
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .75rem;
+    background: rgba(var(--bs-secondary-rgb), .025);
+}
+
+.reachus-detail-item small {
+    display: block;
+    margin-bottom: .35rem;
+    color: var(--bs-secondary-color);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.reachus-contact-value {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    max-width: 100%;
+    padding: .4rem .6rem;
+    border-radius: .5rem;
+    color: var(--bs-primary);
+    background: var(--reachus-soft-primary);
+    font-family: var(--bs-font-monospace);
+    overflow-wrap: anywhere;
+}
+
+.reachus-message-body {
+    min-height: 9rem;
+    padding: 1.25rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .8rem;
+    background: rgba(var(--bs-secondary-rgb), .035);
+    line-height: 1.65;
+    white-space: pre-wrap;
+}
+
+.reachus-destination-panel {
+    border: 1px solid var(--bs-border-color);
+    border-radius: .75rem;
+    background: rgba(var(--bs-secondary-rgb), .025);
+}
+
+.reachus-destination-panel [data-redirect-field] {
+    padding: 1rem;
+    border-top: 1px solid var(--bs-border-color);
+    background: var(--bs-body-bg);
+}
+
+@media (max-width: 767.98px) {
+    .reachus-hero,
+    .reachus-form-body {
+        padding: 1.25rem;
+    }
+
+    .reachus-method-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .reachus-submit-row,
+    .reachus-admin-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .reachus-submit-row .btn {
+        width: 100%;
+    }
+
+    .reachus-stat-grid {
+        min-width: 0;
+    }
+
+    .reachus-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reachus-method-card {
+        transition: none;
+    }
+}

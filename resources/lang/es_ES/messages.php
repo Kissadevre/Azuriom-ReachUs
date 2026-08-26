@@ -3,6 +3,21 @@
 return [
     'title' => 'Contáctanos',
     'description' => 'Contacta con nuestro equipo sin crear una cuenta.',
+    'hero' => [
+        'eyebrow' => 'Estamos para ayudarte',
+        'features' => 'Características del formulario de contacto',
+        'no_account' => 'No necesitas una cuenta',
+        'protected' => 'Envío protegido',
+        'direct_reply' => 'Respuesta por tu medio preferido',
+    ],
+    'sections' => [
+        'identity' => 'Cuéntanos quién eres',
+        'identity_help' => 'Utiliza el nombre con el que debemos dirigirnos a ti.',
+        'contact' => '¿Cómo debemos contactarte?',
+        'contact_help' => 'Selecciona un medio e introduce los datos correspondientes.',
+        'message' => '¿Cómo podemos ayudarte?',
+        'message_help' => 'Proporciona suficiente contexto para comprender tu solicitud.',
+    ],
     'methods' => [
         'whatsapp' => 'WhatsApp', 'telegram' => 'Telegram', 'email' => 'Correo electrónico', 'discord' => 'Discord',
     ],
@@ -17,6 +32,7 @@ return [
         'contact_method' => 'Medio de contacto preferido', 'choose_method' => 'Selecciona un medio de contacto',
         'contact_value' => 'Datos de contacto', 'reason' => 'Motivo de contacto',
         'submit' => 'Enviar mensaje',
+        'secure_note' => 'Tu envío está protegido por nuestros controles contra abusos.',
         'sent' => 'Tu mensaje se envió correctamente. Nos pondremos en contacto contigo pronto.',
         'too_many_attempts' => 'Has enviado demasiadas solicitudes. Espera un minuto e inténtalo de nuevo.',
     ],

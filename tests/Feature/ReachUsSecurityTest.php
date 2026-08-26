@@ -40,6 +40,32 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString("input.setAttribute('pattern', '[A-Za-z0-9@_-]+')", $view);
     }
 
+    public function test_polished_views_share_isolated_styles_and_responsive_controls(): void
+    {
+        $pluginPath = dirname(__DIR__, 2);
+        $views = [
+            $pluginPath.'/resources/views/index.blade.php',
+            $pluginPath.'/resources/views/admin/settings.blade.php',
+            $pluginPath.'/resources/views/admin/responses/index.blade.php',
+            $pluginPath.'/resources/views/admin/responses/show.blade.php',
+        ];
+
+        foreach ($views as $viewPath) {
+            $this->assertStringContainsString("@include('reachus::_styles')", file_get_contents($viewPath));
+        }
+
+        $publicView = file_get_contents($views[0]);
+        $styles = file_get_contents($pluginPath.'/assets/css/reachus.css');
+        $styleLoader = file_get_contents($pluginPath.'/resources/views/_styles.blade.php');
+
+        $this->assertStringContainsString('reachus-method-grid', $publicView);
+        $this->assertStringContainsString('type="radio"', $publicView);
+        $this->assertStringContainsString('id="reasonCounter"', $publicView);
+        $this->assertStringContainsString('@media (max-width: 767.98px)', $styles);
+        $this->assertStringContainsString("plugin_path('reachus/assets/css/reachus.css')", $styleLoader);
+        $this->assertStringNotContainsString('plugin_asset(', $styleLoader);
+    }
+
     public function test_administration_routes_enforce_section_permissions(): void
     {
         $router = $this->app->make('router');

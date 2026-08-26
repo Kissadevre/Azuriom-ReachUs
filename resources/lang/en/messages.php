@@ -3,6 +3,21 @@
 return [
     'title' => 'Reach Us',
     'description' => 'Contact our team without creating an account.',
+    'hero' => [
+        'eyebrow' => 'We are here to help',
+        'features' => 'Contact form features',
+        'no_account' => 'No account required',
+        'protected' => 'Protected submission',
+        'direct_reply' => 'Reply through your preferred channel',
+    ],
+    'sections' => [
+        'identity' => 'Tell us who you are',
+        'identity_help' => 'Use the name we should address you by.',
+        'contact' => 'How should we contact you?',
+        'contact_help' => 'Choose one channel and enter the corresponding details.',
+        'message' => 'How can we help?',
+        'message_help' => 'Give us enough context to understand your request.',
+    ],
     'methods' => [
         'whatsapp' => 'WhatsApp', 'telegram' => 'Telegram', 'email' => 'Email', 'discord' => 'Discord',
     ],
@@ -17,6 +32,7 @@ return [
         'contact_method' => 'Preferred contact method', 'choose_method' => 'Choose a contact method',
         'contact_value' => 'Contact details', 'reason' => 'Reason for contacting us',
         'submit' => 'Send message',
+        'secure_note' => 'Your submission is protected by our anti-abuse controls.',
         'sent' => 'Your message was sent successfully. We will contact you soon.',
         'too_many_attempts' => 'You have sent too many requests. Please wait a minute and try again.',
     ],
