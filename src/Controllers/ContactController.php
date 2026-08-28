@@ -5,6 +5,7 @@ namespace Azuriom\Plugin\ReachUs\Controllers;
 use Azuriom\Http\Controllers\Controller;
 use Azuriom\Plugin\ReachUs\Models\ContactMessage;
 use Azuriom\Plugin\ReachUs\Requests\ContactRequest;
+use Azuriom\Plugin\ReachUs\Services\ContactChannelService;
 use Azuriom\Plugin\ReachUs\Services\ContactNotificationService;
 use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
 use Illuminate\Contracts\View\View;
@@ -15,7 +16,10 @@ class ContactController extends Controller
     /**
      * Display the public contact page.
      */
-    public function index(ReachUsSettings $settings): View|RedirectResponse
+    public function index(
+        ReachUsSettings $settings,
+        ContactChannelService $channels,
+    ): View|RedirectResponse
     {
         if (auth()->check()) {
             return redirect()->to($settings->authenticatedRedirect());
@@ -26,12 +30,15 @@ class ContactController extends Controller
             'termsRequired' => $settings->termsRequired(),
             'termsText' => $settings->termsText(),
             'termsUrl' => $settings->termsUrl(),
+            'contactChannels' => $channels->channels(),
+            'contactFields' => $channels->fieldConfigurations(),
         ]);
     }
 
     public function store(
         ContactRequest $request,
         ReachUsSettings $settings,
+        ContactChannelService $channels,
         ContactNotificationService $notifications,
     ): RedirectResponse
     {
@@ -39,8 +46,15 @@ class ContactController extends Controller
             return redirect()->to($settings->authenticatedRedirect());
         }
 
-        $message = ContactMessage::create($request->safe()->only([
+        $channel = $channels->find($request->string('contact_method')->toString()) ?? [
+            'name' => $request->string('contact_method')->toString(),
+            'icon' => 'bi bi-chat',
+        ];
+        $message = ContactMessage::create(array_merge($request->safe()->only([
             'name', 'contact_method', 'contact_value', 'reason',
+        ]), [
+            'contact_channel_name' => $channel['name'],
+            'contact_channel_icon' => $channel['icon'],
         ]));
         $notifications->send($message);
 

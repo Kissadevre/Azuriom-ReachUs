@@ -12,13 +12,19 @@ class ContactMessageTest extends TestCase
     {
         $this->assertTrue(Schema::hasTable('reachus_contact_messages'));
         $this->assertTrue(Schema::hasColumns('reachus_contact_messages', [
-            'name', 'contact_method', 'contact_value', 'reason', 'read_at',
+            'name', 'contact_method', 'contact_channel_name', 'contact_channel_icon',
+            'contact_value', 'reason', 'read_at',
         ]));
     }
 
     public function test_plugin_migrations_can_be_rolled_back_in_reverse_order(): void
     {
         $migrationPath = dirname(__DIR__, 2).'/database/migrations/';
+
+        (require $migrationPath.'2026_08_28_000000_add_channel_snapshot_to_reachus_contact_messages_table.php')->down();
+
+        $this->assertFalse(Schema::hasColumn('reachus_contact_messages', 'contact_channel_name'));
+        $this->assertFalse(Schema::hasColumn('reachus_contact_messages', 'contact_channel_icon'));
 
         (require $migrationPath.'2026_08_26_000001_add_read_at_to_reachus_contact_messages_table.php')->down();
 
@@ -34,10 +40,13 @@ class ContactMessageTest extends TestCase
     {
         $message = ContactMessage::create([
             'name' => 'Guest User', 'contact_method' => 'telegram',
+            'contact_channel_name' => 'Telegram', 'contact_channel_icon' => 'bi bi-telegram',
             'contact_value' => '@guest', 'reason' => 'I have a question.',
         ]);
 
         $this->assertNull($message->read_at);
+        $this->assertSame('Telegram', $message->contact_channel_name);
+        $this->assertSame('bi bi-telegram', $message->contact_channel_icon);
 
         $message->update(['read_at' => now()]);
 

@@ -5,7 +5,17 @@
 @include('reachus::_styles')
 
 @section('content')
-    @php($selectedRedirectType = old('redirect_type', $redirectType))
+    @php
+        $selectedRedirectType = old('redirect_type', $redirectType);
+        $submittedChannels = old('channels', $contactChannels);
+        $configuredChannels = is_array($submittedChannels) && $submittedChannels !== []
+            ? array_values(array_map(fn ($channel) => [
+                'id' => is_array($channel) && is_string($channel['id'] ?? null) ? $channel['id'] : '',
+                'name' => is_array($channel) && is_string($channel['name'] ?? null) ? $channel['name'] : '',
+                'icon' => is_array($channel) && is_string($channel['icon'] ?? null) ? $channel['icon'] : '',
+            ], $submittedChannels))
+            : $contactChannels;
+    @endphp
 
     <div class="reachus-shell">
         <header class="reachus-admin-header">
@@ -18,7 +28,7 @@
             </div>
         </header>
 
-        <form action="{{ route('reachus.admin.settings.save') }}" method="POST">
+        <form action="{{ route('reachus.admin.settings.save') }}" method="POST" id="reachusSettingsForm">
             @csrf
 
             <div class="card reachus-admin-card mb-4">
@@ -120,6 +130,72 @@
             <div class="card reachus-admin-card mb-4">
                 <div class="reachus-admin-card-header">
                     <div class="reachus-section-heading mb-0">
+                        <span class="reachus-section-icon"><i class="bi bi-chat-square-dots" aria-hidden="true"></i></span>
+                        <div>
+                            <h2>{{ trans('reachus::admin.settings.channels_title') }}</h2>
+                            <small class="text-body-secondary">{{ trans('reachus::admin.settings.channels_description', ['max' => $maxContactChannels]) }}</small>
+                        </div>
+                    </div>
+                    <span class="badge text-bg-secondary">
+                        <strong id="channelCount">{{ count($configuredChannels) }}</strong> / {{ $maxContactChannels }}
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    @error('channels')
+                        <div class="alert alert-danger" role="alert"><strong>{{ $message }}</strong></div>
+                    @enderror
+
+                    <div class="reachus-channel-list" id="channelList">
+                        @foreach($configuredChannels as $index => $channel)
+                            @php($previewIcon = \Azuriom\Plugin\ReachUs\Services\ContactChannelService::isAllowedIcon($channel['icon'] ?? null) ? $channel['icon'] : 'bi bi-question-circle')
+                            <div class="reachus-channel-item" data-channel-item>
+                                <input type="hidden" name="channels[{{ $index }}][id]" value="{{ $channel['id'] ?? '' }}" data-channel-field="id">
+                                @error('channels.'.$index.'.id')
+                                    <div class="alert alert-danger py-2" role="alert"><strong>{{ $message }}</strong></div>
+                                @enderror
+                                <div class="row g-3 align-items-start">
+                                    <div class="col-lg-5">
+                                        <label class="form-label fw-semibold" for="channelName{{ $index }}">{{ trans('reachus::admin.settings.channel_name') }}</label>
+                                        <input type="text" class="form-control @error('channels.'.$index.'.name') is-invalid @enderror" id="channelName{{ $index }}" name="channels[{{ $index }}][name]" value="{{ $channel['name'] ?? '' }}" maxlength="64" data-channel-field="name" required>
+                                        @error('channels.'.$index.'.name')
+                                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                        @enderror
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label class="form-label fw-semibold" for="channelIcon{{ $index }}">{{ trans('reachus::admin.settings.channel_icon') }}</label>
+                                        <div class="input-group @error('channels.'.$index.'.icon') has-validation @enderror">
+                                            <span class="input-group-text"><i class="{{ $previewIcon }}" data-channel-icon-preview aria-hidden="true"></i></span>
+                                            <input type="text" class="form-control @error('channels.'.$index.'.icon') is-invalid @enderror" id="channelIcon{{ $index }}" name="channels[{{ $index }}][icon]" value="{{ $channel['icon'] ?? '' }}" maxlength="64" placeholder="bi bi-chat" data-channel-field="icon" required>
+                                            @error('channels.'.$index.'.icon')
+                                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-1 d-flex justify-content-lg-end">
+                                        <button type="button" class="btn btn-outline-danger reachus-channel-remove" data-remove-channel title="{{ trans('reachus::admin.settings.remove_channel') }}" aria-label="{{ trans('reachus::admin.settings.remove_channel') }}">
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
+                        <div class="form-text m-0">
+                            {{ trans('reachus::admin.settings.channel_icon_help') }}
+                            <a href="https://icons.getbootstrap.com/" target="_blank" rel="noopener noreferrer">Bootstrap Icons</a>.
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" id="addChannelButton">
+                            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> {{ trans('reachus::admin.settings.add_channel') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card reachus-admin-card mb-4">
+                <div class="reachus-admin-card-header">
+                    <div class="reachus-section-heading mb-0">
                         <span class="reachus-section-icon"><i class="bi bi-signpost-split" aria-hidden="true"></i></span>
                         <div>
                             <h2>{{ trans('reachus::admin.settings.authenticated_redirect') }}</h2>
@@ -211,6 +287,30 @@
                 </button>
             </div>
         </form>
+
+        <template id="channelTemplate">
+            <div class="reachus-channel-item" data-channel-item>
+                <input type="hidden" name="channels[__INDEX__][id]" value="" data-channel-field="id">
+                <div class="row g-3 align-items-start">
+                    <div class="col-lg-5">
+                        <label class="form-label fw-semibold" for="channelName__INDEX__">{{ trans('reachus::admin.settings.channel_name') }}</label>
+                        <input type="text" class="form-control" id="channelName__INDEX__" name="channels[__INDEX__][name]" maxlength="64" data-channel-field="name" required>
+                    </div>
+                    <div class="col-lg-6">
+                        <label class="form-label fw-semibold" for="channelIcon__INDEX__">{{ trans('reachus::admin.settings.channel_icon') }}</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-chat" data-channel-icon-preview aria-hidden="true"></i></span>
+                            <input type="text" class="form-control" id="channelIcon__INDEX__" name="channels[__INDEX__][icon]" value="bi bi-chat" maxlength="64" placeholder="bi bi-chat" data-channel-field="icon" required>
+                        </div>
+                    </div>
+                    <div class="col-lg-1 d-flex justify-content-lg-end">
+                        <button type="button" class="btn btn-outline-danger reachus-channel-remove" data-remove-channel title="{{ trans('reachus::admin.settings.remove_channel') }}" aria-label="{{ trans('reachus::admin.settings.remove_channel') }}">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
     </div>
 @endsection
 
@@ -222,6 +322,12 @@
             const termsEnabled = document.getElementById('termsEnabledInput');
             const termsConfiguration = document.getElementById('termsConfiguration');
             const termsFields = termsConfiguration.querySelectorAll('input');
+            const channelList = document.getElementById('channelList');
+            const channelTemplate = document.getElementById('channelTemplate');
+            const addChannelButton = document.getElementById('addChannelButton');
+            const channelCount = document.getElementById('channelCount');
+            const maxChannels = {{ $maxContactChannels }};
+            let channelSequence = 0;
 
             function updateRedirectFields() {
                 fields.forEach(function (field) {
@@ -242,10 +348,77 @@
                 });
             }
 
+            function updateChannelControls() {
+                const items = channelList.querySelectorAll('[data-channel-item]');
+
+                channelCount.textContent = items.length;
+                addChannelButton.disabled = items.length >= maxChannels;
+                items.forEach(function (item) {
+                    item.querySelector('[data-remove-channel]').disabled = items.length <= 1;
+                });
+            }
+
+            function renumberChannels() {
+                channelList.querySelectorAll('[data-channel-item]').forEach(function (item, index) {
+                    item.querySelectorAll('[data-channel-field]').forEach(function (field) {
+                        field.name = 'channels[' + index + '][' + field.dataset.channelField + ']';
+
+                        if (field.dataset.channelField !== 'id') {
+                            field.id = 'channel' + field.dataset.channelField.charAt(0).toUpperCase()
+                                + field.dataset.channelField.slice(1) + index;
+                            item.querySelector('label[for^="channel' + field.dataset.channelField.charAt(0).toUpperCase() + '"]')
+                                ?.setAttribute('for', field.id);
+                        }
+                    });
+                });
+            }
+
+            function updateIconPreview(input) {
+                const allowedIcon = /^bi bi-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+                const preview = input.closest('.input-group').querySelector('[data-channel-icon-preview]');
+
+                preview.className = allowedIcon.test(input.value) ? input.value : 'bi bi-question-circle';
+            }
+
+            addChannelButton.addEventListener('click', function () {
+                const index = channelList.querySelectorAll('[data-channel-item]').length;
+
+                if (index >= maxChannels) {
+                    return;
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = channelTemplate.innerHTML.replaceAll('__INDEX__', String(index)).trim();
+                const item = wrapper.firstElementChild;
+                item.querySelector('[data-channel-field="id"]').value = 'custom_'
+                    + Date.now().toString(36) + '_' + (channelSequence++).toString(36);
+                channelList.appendChild(item);
+                updateChannelControls();
+                item.querySelector('[data-channel-field="name"]').focus();
+            });
+
+            channelList.addEventListener('click', function (event) {
+                const removeButton = event.target.closest('[data-remove-channel]');
+
+                if (removeButton && channelList.querySelectorAll('[data-channel-item]').length > 1) {
+                    removeButton.closest('[data-channel-item]').remove();
+                    renumberChannels();
+                    updateChannelControls();
+                }
+            });
+
+            channelList.addEventListener('input', function (event) {
+                if (event.target.matches('[data-channel-field="icon"]')) {
+                    updateIconPreview(event.target);
+                }
+            });
+
             typeSelect.addEventListener('change', updateRedirectFields);
             termsEnabled.addEventListener('change', updateTermsFields);
             updateRedirectFields();
             updateTermsFields();
+            renumberChannels();
+            updateChannelControls();
         });
     </script>
 @endpush

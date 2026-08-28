@@ -34,7 +34,9 @@ return [
     'form' => [
         'name' => 'Name', 'name_help' => 'Letters and spaces only, up to 64 characters.',
         'contact_method' => 'Preferred contact method', 'choose_method' => 'Choose a contact method',
-        'contact_value' => 'Contact details', 'reason' => 'Reason for contacting us',
+        'contact_value' => 'Contact details', 'contact_value_for' => ':channel contact details',
+        'custom_contact_help' => 'Enter the details we should use to contact you through this channel.',
+        'reason' => 'Reason for contacting us',
         'terms_prefix' => 'I have read and accept the',
         'submit' => 'Send message',
         'secure_note' => 'Your submission is protected by our anti-abuse controls.',

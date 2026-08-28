@@ -50,6 +50,8 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString('@if($termsRequired)', $view);
         $this->assertStringContainsString('@if(! $submissionsEnabled)', $view);
         $this->assertStringContainsString('reachus-unavailable-state', $view);
+        $this->assertStringContainsString('@foreach($contactChannels as $channel)', $view);
+        $this->assertStringContainsString('const methods = @json($contactFields)', $view);
     }
 
     public function test_polished_views_share_isolated_styles_and_responsive_controls(): void
@@ -76,6 +78,12 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString('@media (max-width: 767.98px)', $styles);
         $this->assertStringContainsString("plugin_path('reachus/assets/css/reachus.css')", $styleLoader);
         $this->assertStringNotContainsString('plugin_asset(', $styleLoader);
+
+        foreach (array_slice($views, 2) as $responseView) {
+            $contents = file_get_contents($responseView);
+            $this->assertStringContainsString('$message->contact_channel_name', $contents);
+            $this->assertStringContainsString('$message->contact_channel_icon', $contents);
+        }
     }
 
     public function test_administration_routes_enforce_section_permissions(): void
@@ -113,6 +121,12 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString('name="terms_url"', $view);
         $this->assertStringContainsString('name="submissions_enabled"', $view);
         $this->assertStringContainsString('updateTermsFields', $view);
+        $this->assertStringContainsString('id="channelList"', $view);
+        $this->assertStringContainsString('id="channelTemplate"', $view);
+        $this->assertStringContainsString('id="addChannelButton"', $view);
+        $this->assertStringContainsString('data-channel-icon-preview', $view);
+        $this->assertStringContainsString('const maxChannels = {{ $maxContactChannels }}', $view);
+
     }
 
     public function test_guest_submissions_can_be_temporarily_disabled(): void

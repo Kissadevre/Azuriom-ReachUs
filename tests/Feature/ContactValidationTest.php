@@ -4,6 +4,7 @@ namespace Azuriom\Plugin\ReachUs\Tests\Feature;
 
 use Azuriom\Models\Setting;
 use Azuriom\Plugin\ReachUs\Requests\ContactRequest;
+use Azuriom\Plugin\ReachUs\Services\ContactChannelService;
 use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
 use Azuriom\Plugin\ReachUs\Tests\TestCase;
 use Illuminate\Support\Facades\Validator;
@@ -128,6 +129,26 @@ class ContactValidationTest extends TestCase
         $this->assertTrue($rejected->fails());
         $this->assertArrayHasKey('terms_accepted', $rejected->errors()->toArray());
         $this->assertFalse($accepted->fails());
+    }
+
+    public function test_only_configured_channels_are_accepted_and_custom_channels_use_generic_details(): void
+    {
+        Setting::updateSettings(ContactChannelService::SETTINGS_KEY, json_encode([
+            ['id' => 'custom_signal', 'name' => 'Signal', 'icon' => 'bi bi-chat-dots'],
+        ], JSON_THROW_ON_ERROR));
+
+        $removed = $this->validator($this->validData([
+            'contact_method' => 'telegram',
+            'contact_value' => 'john_user',
+        ]));
+        $custom = $this->validator($this->validData([
+            'contact_method' => 'custom_signal',
+            'contact_value' => '+52 (55) 1234.5678',
+        ]));
+
+        $this->assertTrue($removed->fails());
+        $this->assertArrayHasKey('contact_method', $removed->errors()->toArray());
+        $this->assertFalse($custom->fails());
     }
 
     private function validator(array $data): \Illuminate\Contracts\Validation\Validator

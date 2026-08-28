@@ -7,6 +7,7 @@ use Azuriom\Models\ActionLog;
 use Azuriom\Models\Page;
 use Azuriom\Models\Post;
 use Azuriom\Models\Setting;
+use Azuriom\Plugin\ReachUs\Services\ContactChannelService;
 use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +17,7 @@ use Illuminate\Validation\Rule;
 
 class SettingController extends Controller
 {
-    public function show(ReachUsSettings $settings): View
+    public function show(ReachUsSettings $settings, ContactChannelService $channels): View
     {
         return view('reachus::admin.settings', [
             'rateLimit' => $settings->rateLimit(),
@@ -24,6 +25,8 @@ class SettingController extends Controller
             'termsEnabled' => $settings->termsEnabled(),
             'termsText' => $settings->termsText(),
             'termsUrl' => $settings->termsUrl(),
+            'contactChannels' => $channels->channels(),
+            'maxContactChannels' => ContactChannelService::MAX_CHANNELS,
             'redirectTypes' => ReachUsSettings::redirectTypes(),
             'redirectType' => $settings->authenticatedRedirectType(),
             'redirectValue' => $settings->authenticatedRedirectValue(),
@@ -49,6 +52,14 @@ class SettingController extends Controller
                     }
                 },
             ],
+            'channels' => ['required', 'array', 'min:1', 'max:'.ContactChannelService::MAX_CHANNELS],
+            'channels.*.id' => [
+                'required', 'string', 'distinct:strict', 'max:20', 'regex:/^[a-z0-9][a-z0-9_-]*$/D',
+            ],
+            'channels.*.name' => ['required', 'string', 'max:64'],
+            'channels.*.icon' => [
+                'required', 'string', 'max:64', 'regex:/^bi bi-[a-z0-9]+(?:-[a-z0-9]+)*$/D',
+            ],
             'redirect_type' => ['required', Rule::in(ReachUsSettings::redirectTypes())],
             'redirect_link' => [
                 'required_if:redirect_type,link', 'nullable', 'string', 'max:2048',
@@ -70,6 +81,9 @@ class SettingController extends Controller
             'redirect_plugin' => [
                 'required_if:redirect_type,plugin', 'nullable', Rule::in($pluginRoutes->keys()->all()),
             ],
+        ], [
+            'channels.*.id.regex' => trans('reachus::admin.settings.channel_identifier_format'),
+            'channels.*.icon.regex' => trans('reachus::admin.settings.channel_icon_format'),
         ]);
 
         $type = $validated['redirect_type'];
@@ -80,6 +94,11 @@ class SettingController extends Controller
             'posts' => '#',
             'plugin' => $validated['redirect_plugin'],
         };
+        $channels = collect($validated['channels'])->map(fn (array $channel) => [
+            'id' => $channel['id'],
+            'name' => trim($channel['name']),
+            'icon' => $channel['icon'],
+        ])->values()->all();
 
         Setting::updateSettings([
             ReachUsSettings::RATE_LIMIT_KEY => (int) $validated['rate_limit'],
@@ -87,6 +106,7 @@ class SettingController extends Controller
             ReachUsSettings::TERMS_ENABLED_KEY => (bool) $validated['terms_enabled'],
             ReachUsSettings::TERMS_TEXT_KEY => $validated['terms_text'] ?? '',
             ReachUsSettings::TERMS_URL_KEY => $validated['terms_url'] ?? '',
+            ContactChannelService::SETTINGS_KEY => json_encode($channels, JSON_THROW_ON_ERROR),
             ReachUsSettings::AUTHENTICATED_REDIRECT_TYPE_KEY => $type,
             ReachUsSettings::AUTHENTICATED_REDIRECT_VALUE_KEY => $value,
             ReachUsSettings::AUTHENTICATED_REDIRECT_KEY => null,

@@ -34,7 +34,9 @@ return [
     'form' => [
         'name' => 'Nombre', 'name_help' => 'Solo letras y espacios, hasta 64 caracteres.',
         'contact_method' => 'Medio de contacto preferido', 'choose_method' => 'Selecciona un medio de contacto',
-        'contact_value' => 'Datos de contacto', 'reason' => 'Motivo de contacto',
+        'contact_value' => 'Datos de contacto', 'contact_value_for' => 'Datos de contacto de :channel',
+        'custom_contact_help' => 'Introduce los datos que debemos utilizar para contactarte mediante este medio.',
+        'reason' => 'Motivo de contacto',
         'terms_prefix' => 'He leído y acepto la',
         'submit' => 'Enviar mensaje',
         'secure_note' => 'Tu envío está protegido por nuestros controles contra abusos.',

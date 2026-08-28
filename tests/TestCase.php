@@ -50,6 +50,11 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
+        $this->app->make('translator')->addNamespace(
+            'reachus',
+            dirname(__DIR__).'/resources/lang',
+        );
+
         if (DB::connection('sqlite')->getDatabaseName() !== ':memory:') {
             throw new RuntimeException('Reach Us tests refuse to run outside SQLite memory.');
         }

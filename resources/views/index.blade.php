@@ -6,12 +6,7 @@
 
 @section('content')
     @php
-        $methodIcons = [
-            'whatsapp' => 'bi bi-whatsapp',
-            'telegram' => 'bi bi-telegram',
-            'email' => 'bi bi-envelope',
-            'discord' => 'bi bi-discord',
-        ];
+        $methodIcons = collect($contactChannels)->pluck('icon', 'id')->all();
     @endphp
 
     <div class="reachus-shell reachus-public py-2 py-lg-4">
@@ -83,12 +78,12 @@
                                 <fieldset>
                                     <legend class="visually-hidden">{{ trans('reachus::messages.form.contact_method') }}</legend>
                                     <div class="reachus-method-grid">
-                                        @foreach(\Azuriom\Plugin\ReachUs\Models\ContactMessage::contactMethods() as $method)
+                                        @foreach($contactChannels as $channel)
                                             <div class="reachus-method-option">
-                                                <input type="radio" class="visually-hidden" id="contactMethod{{ ucfirst($method) }}" name="contact_method" value="{{ $method }}" @checked(old('contact_method') === $method) required>
-                                                <label class="reachus-method-card" for="contactMethod{{ ucfirst($method) }}">
-                                                    <i class="{{ $methodIcons[$method] }}" aria-hidden="true"></i>
-                                                    <span>{{ trans('reachus::messages.methods.'.$method) }}</span>
+                                                <input type="radio" class="visually-hidden" id="contactMethod{{ $loop->index }}" name="contact_method" value="{{ $channel['id'] }}" @checked(old('contact_method') === $channel['id']) required>
+                                                <label class="reachus-method-card" for="contactMethod{{ $loop->index }}">
+                                                    <i class="{{ $channel['icon'] }}" aria-hidden="true"></i>
+                                                    <span>{{ $channel['name'] }}</span>
                                                 </label>
                                             </div>
                                         @endforeach
@@ -178,7 +173,7 @@
             const icon = document.getElementById('contactValueIcon');
             const reason = document.getElementById('reasonInput');
             const reasonCounter = document.getElementById('reasonCounter');
-            const methods = @json(trans('reachus::messages.contact_fields'));
+            const methods = @json($contactFields);
             const icons = @json($methodIcons);
 
             function selectedMethod() {

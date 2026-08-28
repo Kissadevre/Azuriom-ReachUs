@@ -3,6 +3,7 @@
 namespace Azuriom\Plugin\ReachUs\Requests;
 
 use Azuriom\Plugin\ReachUs\Models\ContactMessage;
+use Azuriom\Plugin\ReachUs\Services\ContactChannelService;
 use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -21,10 +22,11 @@ class ContactRequest extends FormRequest
     public function rules(): array
     {
         $termsRequired = app(ReachUsSettings::class)->termsRequired();
+        $channelIdentifiers = app(ContactChannelService::class)->identifiers();
 
         return [
             'name' => ['required', 'string', 'max:64', 'regex:/^[\pL\pM ]+$/u'],
-            'contact_method' => ['required', Rule::in(ContactMessage::contactMethods())],
+            'contact_method' => ['required', Rule::in($channelIdentifiers)],
             'contact_value' => [
                 'required',
                 'string',
