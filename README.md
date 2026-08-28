@@ -32,3 +32,4 @@ From this plugin directory, run:
 ```
 
 All plugin source remains within `plugins/reachus`; generated Azuriom plugin caches and public assets are not source files.
+Database schema changes are kept in separate, chronologically ordered migrations instead of being consolidated into the original table creation.

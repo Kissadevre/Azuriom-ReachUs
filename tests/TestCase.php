@@ -66,7 +66,12 @@ abstract class TestCase extends BaseTestCase
             (require dirname(__DIR__, 3).'/database/migrations/'.$migration)->up();
         }
 
-        (require dirname(__DIR__).'/database/migrations/2026_08_26_000000_create_reachus_messages_table.php')->up();
+        $pluginMigrations = glob(dirname(__DIR__).'/database/migrations/*.php') ?: [];
+        sort($pluginMigrations);
+
+        foreach ($pluginMigrations as $migration) {
+            (require $migration)->up();
+        }
     }
 
     private function setEnvironmentVariables(array $variables): void

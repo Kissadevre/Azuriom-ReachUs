@@ -16,6 +16,20 @@ class ContactMessageTest extends TestCase
         ]));
     }
 
+    public function test_plugin_migrations_can_be_rolled_back_in_reverse_order(): void
+    {
+        $migrationPath = dirname(__DIR__, 2).'/database/migrations/';
+
+        (require $migrationPath.'2026_08_26_000001_add_read_at_to_reachus_contact_messages_table.php')->down();
+
+        $this->assertTrue(Schema::hasTable('reachus_contact_messages'));
+        $this->assertFalse(Schema::hasColumn('reachus_contact_messages', 'read_at'));
+
+        (require $migrationPath.'2026_08_26_000000_create_reachus_contact_messages_table.php')->down();
+
+        $this->assertFalse(Schema::hasTable('reachus_contact_messages'));
+    }
+
     public function test_contact_message_can_be_stored_and_marked_read(): void
     {
         $message = ContactMessage::create([
