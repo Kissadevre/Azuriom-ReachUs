@@ -14,14 +14,17 @@ class ContactChannelServiceTest extends TestCase
 
         $this->assertSame(['telegram', 'whatsapp', 'email', 'discord'], array_column($channels, 'id'));
         $this->assertSame('bi bi-telegram', $channels[0]['icon']);
+        $this->assertSame(ContactChannelService::TYPE_ALPHANUMERIC, $channels[0]['data_type']);
+        $this->assertSame(6, $channels[1]['min_length']);
+        $this->assertSame(16, $channels[1]['max_length']);
         $this->assertCount(ContactChannelService::MAX_CHANNELS, $channels);
     }
 
     public function test_configured_channels_can_be_renamed_removed_and_replaced(): void
     {
         Setting::updateSettings(ContactChannelService::SETTINGS_KEY, json_encode([
-            ['id' => 'whatsapp', 'name' => 'Phone', 'icon' => 'bi bi-telephone'],
-            ['id' => 'custom_signal', 'name' => 'Signal', 'icon' => 'bi bi-chat-dots'],
+            ['id' => 'whatsapp', 'name' => 'Phone', 'icon' => 'bi bi-telephone', 'data_type' => 'numeric', 'min_length' => 8, 'max_length' => 14],
+            ['id' => 'custom_signal', 'name' => 'Signal', 'icon' => 'bi bi-chat-dots', 'data_type' => 'text', 'min_length' => 2, 'max_length' => 80],
         ], JSON_THROW_ON_ERROR));
 
         $service = app(ContactChannelService::class);
@@ -32,7 +35,7 @@ class ContactChannelServiceTest extends TestCase
         $this->assertNull($service->find('telegram'));
         $this->assertSame('Phone contact details', $service->fieldConfigurations()['whatsapp']['label']);
         $this->assertSame(
-            'Enter the details we should use to contact you through this channel.',
+            'Enter between 2 and 80 characters.',
             $service->fieldConfigurations()['custom_signal']['help'],
         );
     }
@@ -41,9 +44,10 @@ class ContactChannelServiceTest extends TestCase
     {
         foreach ([
             'invalid json',
-            json_encode([['id' => 'unsafe', 'name' => 'Unsafe', 'icon' => 'text-danger onclick']], JSON_THROW_ON_ERROR),
+            json_encode([['id' => 'unsafe', 'name' => 'Unsafe', 'icon' => 'text-danger onclick', 'data_type' => 'text', 'min_length' => 1, 'max_length' => 20]], JSON_THROW_ON_ERROR),
             json_encode(array_fill(0, ContactChannelService::MAX_CHANNELS + 1, [
                 'id' => 'duplicate', 'name' => 'Duplicate', 'icon' => 'bi bi-chat',
+                'data_type' => 'text', 'min_length' => 1, 'max_length' => 20,
             ]), JSON_THROW_ON_ERROR),
         ] as $configuration) {
             Setting::updateSettings(ContactChannelService::SETTINGS_KEY, $configuration);
@@ -54,5 +58,17 @@ class ContactChannelServiceTest extends TestCase
         $this->assertTrue(ContactChannelService::isAllowedIcon('bi bi-person-lines-fill'));
         $this->assertFalse(ContactChannelService::isAllowedIcon('fa fa-user'));
         $this->assertFalse(ContactChannelService::isAllowedIcon('bi bi-chat text-danger'));
+    }
+
+    public function test_invalid_length_ranges_fall_back_to_default_channels(): void
+    {
+        foreach ([[0, 10], [10, 9], [1, 256]] as [$minimum, $maximum]) {
+            Setting::updateSettings(ContactChannelService::SETTINGS_KEY, json_encode([[
+                'id' => 'custom', 'name' => 'Custom', 'icon' => 'bi bi-chat',
+                'data_type' => 'text', 'min_length' => $minimum, 'max_length' => $maximum,
+            ]], JSON_THROW_ON_ERROR));
+
+            $this->assertSame(ContactChannelService::defaults(), app(ContactChannelService::class)->channels());
+        }
     }
 }

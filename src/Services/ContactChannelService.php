@@ -8,12 +8,17 @@ class ContactChannelService
 {
     public const SETTINGS_KEY = 'reachus.contact_channels';
     public const MAX_CHANNELS = 4;
+    public const TYPE_TEXT = 'text';
+    public const TYPE_ALPHANUMERIC = 'alphanumeric';
+    public const TYPE_NUMERIC = 'numeric';
+    public const MIN_LENGTH = 1;
+    public const MAX_LENGTH = 255;
 
     private const DEFAULT_CHANNELS = [
-        ['id' => 'telegram', 'name' => 'Telegram', 'icon' => 'bi bi-telegram'],
-        ['id' => 'whatsapp', 'name' => 'WhatsApp', 'icon' => 'bi bi-whatsapp'],
-        ['id' => 'email', 'name' => 'Email', 'icon' => 'bi bi-envelope'],
-        ['id' => 'discord', 'name' => 'Discord', 'icon' => 'bi bi-discord'],
+        ['id' => 'telegram', 'name' => 'Telegram', 'icon' => 'bi bi-telegram', 'data_type' => 'alphanumeric', 'min_length' => 1, 'max_length' => 255],
+        ['id' => 'whatsapp', 'name' => 'WhatsApp', 'icon' => 'bi bi-whatsapp', 'data_type' => 'numeric', 'min_length' => 6, 'max_length' => 16],
+        ['id' => 'email', 'name' => 'Email', 'icon' => 'bi bi-envelope', 'data_type' => 'text', 'min_length' => 3, 'max_length' => 255],
+        ['id' => 'discord', 'name' => 'Discord', 'icon' => 'bi bi-discord', 'data_type' => 'alphanumeric', 'min_length' => 1, 'max_length' => 255],
     ];
 
     public function channels(): array
@@ -41,12 +46,18 @@ class ContactChannelService
 
         foreach ($configured as $channel) {
             if (! is_array($channel)
-                || ! isset($channel['id'], $channel['name'], $channel['icon'])
+                || ! isset($channel['id'], $channel['name'], $channel['icon'], $channel['data_type'], $channel['min_length'], $channel['max_length'])
                 || ! self::isAllowedIdentifier($channel['id'])
                 || ! is_string($channel['name'])
                 || trim($channel['name']) === ''
                 || mb_strlen(trim($channel['name'])) > 64
                 || ! self::isAllowedIcon($channel['icon'])
+                || ! in_array($channel['data_type'], self::dataTypes(), true)
+                || ! is_int($channel['min_length'])
+                || ! is_int($channel['max_length'])
+                || $channel['min_length'] < self::MIN_LENGTH
+                || $channel['max_length'] > self::MAX_LENGTH
+                || $channel['max_length'] < $channel['min_length']
                 || in_array($channel['id'], $identifiers, true)) {
                 return self::DEFAULT_CHANNELS;
             }
@@ -55,6 +66,9 @@ class ContactChannelService
                 'id' => $channel['id'],
                 'name' => trim($channel['name']),
                 'icon' => $channel['icon'],
+                'data_type' => $channel['data_type'],
+                'min_length' => $channel['min_length'],
+                'max_length' => $channel['max_length'],
             ];
             $identifiers[] = $channel['id'];
         }
@@ -83,12 +97,31 @@ class ContactChannelService
         $configurations = [];
 
         foreach ($this->channels() as $channel) {
-            $translated = trans('reachus::messages.contact_fields.'.$channel['id']);
+            $profile = self::validationProfile($channel);
             $configurations[$channel['id']] = [
                 'label' => trans('reachus::messages.form.contact_value_for', ['channel' => $channel['name']]),
-                'help' => is_array($translated)
-                    ? $translated['help']
-                    : trans('reachus::messages.form.custom_contact_help'),
+                'help' => trans('reachus::messages.contact_types.'.$profile, [
+                    'min' => $channel['min_length'],
+                    'max' => $channel['max_length'],
+                ]),
+                'htmlType' => $profile === 'email' ? 'email' : 'text',
+                'inputMode' => match ($profile) {
+                    'email' => 'email',
+                    'whatsapp' => 'tel',
+                    self::TYPE_NUMERIC => 'numeric',
+                    default => 'text',
+                },
+                'minLength' => $channel['min_length'],
+                'maxLength' => $channel['max_length'],
+                'pattern' => match ($profile) {
+                    'whatsapp' => '\\+?[0-9]+',
+                    'username' => '[A-Za-z0-9_-]+',
+                    'email' => '[A-Za-z0-9@_-]+',
+                    self::TYPE_ALPHANUMERIC => '[\\p{L}\\p{N}]+',
+                    self::TYPE_NUMERIC => '[0-9]+',
+                    default => null,
+                },
+                'filter' => $profile,
             ];
         }
 
@@ -98,6 +131,29 @@ class ContactChannelService
     public static function defaults(): array
     {
         return self::DEFAULT_CHANNELS;
+    }
+
+    public static function dataTypes(): array
+    {
+        return [self::TYPE_TEXT, self::TYPE_ALPHANUMERIC, self::TYPE_NUMERIC];
+    }
+
+    public static function validationProfile(array $channel): string
+    {
+        if ($channel['id'] === 'whatsapp' && $channel['data_type'] === self::TYPE_NUMERIC) {
+            return 'whatsapp';
+        }
+
+        if (in_array($channel['id'], ['telegram', 'discord'], true)
+            && $channel['data_type'] === self::TYPE_ALPHANUMERIC) {
+            return 'username';
+        }
+
+        if ($channel['id'] === 'email' && $channel['data_type'] === self::TYPE_TEXT) {
+            return 'email';
+        }
+
+        return $channel['data_type'];
     }
 
     public static function isAllowedIdentifier(mixed $identifier): bool

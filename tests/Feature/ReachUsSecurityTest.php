@@ -43,9 +43,11 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString('id="captcha-form"', $view);
         $this->assertStringContainsString("@include('elements.captcha', ['center' => true])", $view);
         $this->assertStringContainsString("input.removeAttribute('pattern')", $view);
-        $this->assertStringContainsString("input.maxLength = selected === 'whatsapp' ? 16 : 255", $view);
-        $this->assertStringContainsString("input.setAttribute('pattern', '[A-Za-z0-9_-]+')", $view);
-        $this->assertStringContainsString("input.setAttribute('pattern', '[A-Za-z0-9@_-]+')", $view);
+        $this->assertStringContainsString('input.minLength = configuration?.minLength ?? 0', $view);
+        $this->assertStringContainsString('input.maxLength = configuration?.maxLength ?? 255', $view);
+        $this->assertStringContainsString('input.setAttribute(\'pattern\', configuration.pattern)', $view);
+        $this->assertStringContainsString("configuration?.filter === 'alphanumeric'", $view);
+        $this->assertStringContainsString("configuration?.filter === 'numeric'", $view);
         $this->assertStringContainsString('name="terms_accepted"', $view);
         $this->assertStringContainsString('@if($termsRequired)', $view);
         $this->assertStringContainsString('@if(! $submissionsEnabled)', $view);
@@ -126,6 +128,9 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString('id="addChannelButton"', $view);
         $this->assertStringContainsString('data-channel-icon-preview', $view);
         $this->assertStringContainsString('const maxChannels = {{ $maxContactChannels }}', $view);
+        $this->assertStringContainsString('data-channel-field="data_type"', $view);
+        $this->assertStringContainsString('data-channel-field="min_length"', $view);
+        $this->assertStringContainsString('data-channel-field="max_length"', $view);
 
     }
 

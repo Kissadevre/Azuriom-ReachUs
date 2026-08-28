@@ -134,7 +134,7 @@ class ContactValidationTest extends TestCase
     public function test_only_configured_channels_are_accepted_and_custom_channels_use_generic_details(): void
     {
         Setting::updateSettings(ContactChannelService::SETTINGS_KEY, json_encode([
-            ['id' => 'custom_signal', 'name' => 'Signal', 'icon' => 'bi bi-chat-dots'],
+            ['id' => 'custom_signal', 'name' => 'Signal', 'icon' => 'bi bi-chat-dots', 'data_type' => 'text', 'min_length' => 5, 'max_length' => 30],
         ], JSON_THROW_ON_ERROR));
 
         $removed = $this->validator($this->validData([
@@ -149,6 +149,53 @@ class ContactValidationTest extends TestCase
         $this->assertTrue($removed->fails());
         $this->assertArrayHasKey('contact_method', $removed->errors()->toArray());
         $this->assertFalse($custom->fails());
+    }
+
+    public function test_configured_data_types_and_length_limits_are_enforced(): void
+    {
+        Setting::updateSettings(ContactChannelService::SETTINGS_KEY, json_encode([
+            ['id' => 'custom_code', 'name' => 'Code', 'icon' => 'bi bi-key', 'data_type' => 'alphanumeric', 'min_length' => 4, 'max_length' => 8],
+            ['id' => 'custom_number', 'name' => 'Number', 'icon' => 'bi bi-123', 'data_type' => 'numeric', 'min_length' => 3, 'max_length' => 5],
+        ], JSON_THROW_ON_ERROR));
+
+        foreach ([
+            ['custom_code', 'Ab12', false],
+            ['custom_code', 'Áb12', false],
+            ['custom_code', 'Ab-12', true],
+            ['custom_code', 'A1', true],
+            ['custom_code', 'Abcdef123', true],
+            ['custom_number', '1234', false],
+            ['custom_number', '+123', true],
+            ['custom_number', '12', true],
+            ['custom_number', '123456', true],
+        ] as [$method, $value, $shouldFail]) {
+            $validator = $this->validator($this->validData([
+                'contact_method' => $method,
+                'contact_value' => $value,
+            ]));
+
+            $this->assertSame($shouldFail, $validator->fails(), $method.' value '.$value);
+        }
+    }
+
+    public function test_changing_a_builtin_channel_type_replaces_its_specialized_format(): void
+    {
+        Setting::updateSettings(ContactChannelService::SETTINGS_KEY, json_encode([
+            ['id' => 'whatsapp', 'name' => 'WhatsApp', 'icon' => 'bi bi-whatsapp', 'data_type' => 'text', 'min_length' => 4, 'max_length' => 12],
+            ['id' => 'email', 'name' => 'Email', 'icon' => 'bi bi-envelope', 'data_type' => 'numeric', 'min_length' => 3, 'max_length' => 6],
+        ], JSON_THROW_ON_ERROR));
+
+        $text = $this->validator($this->validData([
+            'contact_method' => 'whatsapp',
+            'contact_value' => 'call-me',
+        ]));
+        $numeric = $this->validator($this->validData([
+            'contact_method' => 'email',
+            'contact_value' => '12345',
+        ]));
+
+        $this->assertFalse($text->fails());
+        $this->assertFalse($numeric->fails());
     }
 
     private function validator(array $data): \Illuminate\Contracts\Validation\Validator

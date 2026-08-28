@@ -5,7 +5,7 @@ Reach Us is an Azuriom plugin by Kissadere and Zibuu that gives unauthenticated 
 ## Features
 
 - Guest-only contact form for WhatsApp, Telegram, email, and Discord.
-- Up to four configurable guest contact channels with custom names and Bootstrap Icons.
+- Up to four configurable guest contact channels with custom names, Bootstrap Icons, accepted data types, and length limits.
 - Conditional server-side validation and a 64-character, letters-only name field.
 - Native Azuriom CAPTCHA integration.
 - Configurable per-IP submission rate limit.

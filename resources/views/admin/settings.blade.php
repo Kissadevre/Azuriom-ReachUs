@@ -13,6 +13,9 @@
                 'id' => is_array($channel) && is_string($channel['id'] ?? null) ? $channel['id'] : '',
                 'name' => is_array($channel) && is_string($channel['name'] ?? null) ? $channel['name'] : '',
                 'icon' => is_array($channel) && is_string($channel['icon'] ?? null) ? $channel['icon'] : '',
+                'data_type' => is_array($channel) && is_string($channel['data_type'] ?? null) ? $channel['data_type'] : 'text',
+                'min_length' => is_array($channel) && is_numeric($channel['min_length'] ?? null) ? $channel['min_length'] : 1,
+                'max_length' => is_array($channel) && is_numeric($channel['max_length'] ?? null) ? $channel['max_length'] : 255,
             ], $submittedChannels))
             : $contactChannels;
     @endphp
@@ -177,6 +180,34 @@
                                         </button>
                                     </div>
                                 </div>
+                                <div class="row g-3 mt-1">
+                                    <div class="col-lg-6">
+                                        <label class="form-label fw-semibold" for="channelData_type{{ $index }}">{{ trans('reachus::admin.settings.channel_data_type') }}</label>
+                                        <select class="form-select @error('channels.'.$index.'.data_type') is-invalid @enderror" id="channelData_type{{ $index }}" name="channels[{{ $index }}][data_type]" data-channel-field="data_type" required>
+                                            @foreach($contactDataTypes as $dataType)
+                                                <option value="{{ $dataType }}" @selected(($channel['data_type'] ?? 'text') === $dataType)>{{ trans('reachus::admin.settings.channel_data_types.'.$dataType) }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('channels.'.$index.'.data_type')
+                                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                        @enderror
+                                        <div class="form-text">{{ trans('reachus::admin.settings.channel_data_type_help') }}</div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-3">
+                                        <label class="form-label fw-semibold" for="channelMin_length{{ $index }}">{{ trans('reachus::admin.settings.channel_min_length') }}</label>
+                                        <input type="number" class="form-control @error('channels.'.$index.'.min_length') is-invalid @enderror" id="channelMin_length{{ $index }}" name="channels[{{ $index }}][min_length]" value="{{ $channel['min_length'] ?? 1 }}" min="1" max="255" data-channel-field="min_length" required>
+                                        @error('channels.'.$index.'.min_length')
+                                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                        @enderror
+                                    </div>
+                                    <div class="col-sm-6 col-lg-3">
+                                        <label class="form-label fw-semibold" for="channelMax_length{{ $index }}">{{ trans('reachus::admin.settings.channel_max_length') }}</label>
+                                        <input type="number" class="form-control @error('channels.'.$index.'.max_length') is-invalid @enderror" id="channelMax_length{{ $index }}" name="channels[{{ $index }}][max_length]" value="{{ $channel['max_length'] ?? 255 }}" min="1" max="255" data-channel-field="max_length" required>
+                                        @error('channels.'.$index.'.max_length')
+                                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                        @enderror
+                                    </div>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -309,6 +340,25 @@
                         </button>
                     </div>
                 </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-lg-6">
+                        <label class="form-label fw-semibold" for="channelData_type__INDEX__">{{ trans('reachus::admin.settings.channel_data_type') }}</label>
+                        <select class="form-select" id="channelData_type__INDEX__" name="channels[__INDEX__][data_type]" data-channel-field="data_type" required>
+                            @foreach($contactDataTypes as $dataType)
+                                <option value="{{ $dataType }}">{{ trans('reachus::admin.settings.channel_data_types.'.$dataType) }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">{{ trans('reachus::admin.settings.channel_data_type_help') }}</div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="form-label fw-semibold" for="channelMin_length__INDEX__">{{ trans('reachus::admin.settings.channel_min_length') }}</label>
+                        <input type="number" class="form-control" id="channelMin_length__INDEX__" name="channels[__INDEX__][min_length]" value="1" min="1" max="255" data-channel-field="min_length" required>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="form-label fw-semibold" for="channelMax_length__INDEX__">{{ trans('reachus::admin.settings.channel_max_length') }}</label>
+                        <input type="number" class="form-control" id="channelMax_length__INDEX__" name="channels[__INDEX__][max_length]" value="255" min="1" max="255" data-channel-field="max_length" required>
+                    </div>
+                </div>
             </div>
         </template>
     </div>
@@ -327,6 +377,7 @@
             const addChannelButton = document.getElementById('addChannelButton');
             const channelCount = document.getElementById('channelCount');
             const maxChannels = {{ $maxContactChannels }};
+            const invalidLengthMessage = @json(trans('reachus::admin.settings.channel_max_length_gte'));
             let channelSequence = 0;
 
             function updateRedirectFields() {
@@ -355,7 +406,16 @@
                 addChannelButton.disabled = items.length >= maxChannels;
                 items.forEach(function (item) {
                     item.querySelector('[data-remove-channel]').disabled = items.length <= 1;
+                    validateLengthRange(item);
                 });
+            }
+
+            function validateLengthRange(item) {
+                const minimum = item.querySelector('[data-channel-field="min_length"]');
+                const maximum = item.querySelector('[data-channel-field="max_length"]');
+                const invalid = Number(maximum.value) < Number(minimum.value);
+
+                maximum.setCustomValidity(invalid ? invalidLengthMessage : '');
             }
 
             function renumberChannels() {
@@ -410,6 +470,10 @@
             channelList.addEventListener('input', function (event) {
                 if (event.target.matches('[data-channel-field="icon"]')) {
                     updateIconPreview(event.target);
+                }
+
+                if (event.target.matches('[data-channel-field="min_length"], [data-channel-field="max_length"]')) {
+                    validateLengthRange(event.target.closest('[data-channel-item]'));
                 }
             });
 

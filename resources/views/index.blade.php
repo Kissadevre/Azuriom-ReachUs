@@ -190,18 +190,15 @@
 
                 group.hidden = ! configuration;
                 input.required = Boolean(configuration);
-                input.type = selected === 'email' ? 'email' : 'text';
-                input.inputMode = selected === 'whatsapp' ? 'tel' : (selected === 'email' ? 'email' : 'text');
-                input.maxLength = selected === 'whatsapp' ? 16 : 255;
-                input.autocomplete = selected === 'email' ? 'email' : 'off';
+                input.type = configuration?.htmlType ?? 'text';
+                input.inputMode = configuration?.inputMode ?? 'text';
+                input.minLength = configuration?.minLength ?? 0;
+                input.maxLength = configuration?.maxLength ?? 255;
+                input.autocomplete = configuration?.filter === 'email' ? 'email' : 'off';
                 input.title = configuration ? configuration.help : '';
 
-                if (selected === 'whatsapp') {
-                    input.setAttribute('pattern', '(?:[0-9]{6,16}|\\+[0-9]{5,15})');
-                } else if (selected === 'discord' || selected === 'telegram') {
-                    input.setAttribute('pattern', '[A-Za-z0-9_-]+');
-                } else if (selected === 'email') {
-                    input.setAttribute('pattern', '[A-Za-z0-9@_-]+');
+                if (configuration?.pattern) {
+                    input.setAttribute('pattern', configuration.pattern);
                 } else {
                     input.removeAttribute('pattern');
                 }
@@ -223,17 +220,21 @@
             });
 
             input.addEventListener('input', function () {
-                const selected = selectedMethod();
+                const configuration = methods[selectedMethod()];
 
-                if (selected === 'whatsapp') {
+                if (configuration?.filter === 'whatsapp') {
                     const hasLeadingPlus = input.value.startsWith('+');
                     const digits = input.value.replace(/\D/g, '');
 
-                    input.value = ((hasLeadingPlus ? '+' : '') + digits).slice(0, 16);
-                } else if (selected === 'discord' || selected === 'telegram') {
+                    input.value = ((hasLeadingPlus ? '+' : '') + digits).slice(0, input.maxLength);
+                } else if (configuration?.filter === 'username') {
                     input.value = input.value.replace(/[^A-Za-z0-9_-]/g, '');
-                } else if (selected === 'email') {
+                } else if (configuration?.filter === 'email') {
                     input.value = input.value.replace(/[^A-Za-z0-9@_-]/g, '');
+                } else if (configuration?.filter === 'alphanumeric') {
+                    input.value = input.value.replace(/[^\p{L}\p{N}]/gu, '');
+                } else if (configuration?.filter === 'numeric') {
+                    input.value = input.value.replace(/\D/g, '');
                 }
             });
 

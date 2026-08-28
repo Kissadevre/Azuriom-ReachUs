@@ -27,6 +27,7 @@ class SettingController extends Controller
             'termsUrl' => $settings->termsUrl(),
             'contactChannels' => $channels->channels(),
             'maxContactChannels' => ContactChannelService::MAX_CHANNELS,
+            'contactDataTypes' => ContactChannelService::dataTypes(),
             'redirectTypes' => ReachUsSettings::redirectTypes(),
             'redirectType' => $settings->authenticatedRedirectType(),
             'redirectValue' => $settings->authenticatedRedirectValue(),
@@ -60,6 +61,15 @@ class SettingController extends Controller
             'channels.*.icon' => [
                 'required', 'string', 'max:64', 'regex:/^bi bi-[a-z0-9]+(?:-[a-z0-9]+)*$/D',
             ],
+            'channels.*.data_type' => ['required', Rule::in(ContactChannelService::dataTypes())],
+            'channels.*.min_length' => [
+                'required', 'integer', 'min:'.ContactChannelService::MIN_LENGTH,
+                'max:'.ContactChannelService::MAX_LENGTH,
+            ],
+            'channels.*.max_length' => [
+                'required', 'integer', 'min:'.ContactChannelService::MIN_LENGTH,
+                'max:'.ContactChannelService::MAX_LENGTH, 'gte:channels.*.min_length',
+            ],
             'redirect_type' => ['required', Rule::in(ReachUsSettings::redirectTypes())],
             'redirect_link' => [
                 'required_if:redirect_type,link', 'nullable', 'string', 'max:2048',
@@ -84,6 +94,7 @@ class SettingController extends Controller
         ], [
             'channels.*.id.regex' => trans('reachus::admin.settings.channel_identifier_format'),
             'channels.*.icon.regex' => trans('reachus::admin.settings.channel_icon_format'),
+            'channels.*.max_length.gte' => trans('reachus::admin.settings.channel_max_length_gte'),
         ]);
 
         $type = $validated['redirect_type'];
@@ -98,6 +109,9 @@ class SettingController extends Controller
             'id' => $channel['id'],
             'name' => trim($channel['name']),
             'icon' => $channel['icon'],
+            'data_type' => $channel['data_type'],
+            'min_length' => (int) $channel['min_length'],
+            'max_length' => (int) $channel['max_length'],
         ])->values()->all();
 
         Setting::updateSettings([
