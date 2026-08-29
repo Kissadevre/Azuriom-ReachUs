@@ -36,10 +36,15 @@ class ReachUsSecurityTest extends TestCase
         );
     }
 
-    public function test_form_uses_the_shared_azuriom_captcha_element(): void
+    public function test_form_uses_only_the_native_azuriom_captcha_view(): void
     {
-        $view = file_get_contents(dirname(__DIR__, 2).'/resources/views/index.blade.php');
+        $pluginPath = dirname(__DIR__, 2);
+        $azuriomPath = dirname(__DIR__, 4);
+        $view = file_get_contents($pluginPath.'/resources/views/index.blade.php');
 
+        $this->assertFileExists($azuriomPath.'/resources/views/elements/captcha.blade.php');
+        $this->assertFileDoesNotExist($pluginPath.'/resources/views/captcha.blade.php');
+        $this->assertFileDoesNotExist($pluginPath.'/resources/views/elements/captcha.blade.php');
         $this->assertStringContainsString('id="captcha-form"', $view);
         $this->assertStringContainsString("@include('elements.captcha', ['center' => true])", $view);
         $this->assertStringContainsString("input.removeAttribute('pattern')", $view);

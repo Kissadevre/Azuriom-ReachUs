@@ -20,7 +20,7 @@ Reach Us is an Azuriom plugin by Kissadere and Zibuu that gives unauthenticated 
 
 Assign `reachus.responses` to roles that should manage and receive notifications for contact responses. Assign `reachus.settings` to roles that may configure the form rate limit, policy acceptance, and authenticated visitor redirect. Users also need Azuriom admin access to open plugin administration routes.
 
-CAPTCHA is configured globally in Azuriom. When a supported CAPTCHA provider and its keys are configured there, Reach Us automatically renders and verifies it.
+CAPTCHA is configured globally in Azuriom. Reach Us renders Azuriom's native `elements.captcha` view and uses its native `captcha` middleware, so providers added or updated by Azuriom require no duplicated plugin view.
 
 The authenticated visitor redirect follows Azuriom's navbar destination model. Existing local-path settings remain compatible, external links are limited to HTTP(S), and the Reach Us form route is excluded from plugin destinations to prevent redirect loops.
 
