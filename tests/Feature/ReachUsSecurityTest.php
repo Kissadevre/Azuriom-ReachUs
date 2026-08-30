@@ -103,11 +103,14 @@ class ReachUsSecurityTest extends TestCase
 
         $responses = $router->getRoutes()->getByName('reachus.admin.responses.index');
         $settings = $router->getRoutes()->getByName('reachus.admin.settings');
+        $discordTest = $router->getRoutes()->getByName('reachus.admin.settings.discord.test');
 
         $this->assertNotNull($responses);
         $this->assertNotNull($settings);
+        $this->assertNotNull($discordTest);
         $this->assertContains('can:reachus.responses', $responses->gatherMiddleware());
         $this->assertContains('can:reachus.settings', $settings->gatherMiddleware());
+        $this->assertContains('can:reachus.settings', $discordTest->gatherMiddleware());
     }
 
     public function test_settings_form_offers_the_navbar_style_destination_types(): void
@@ -136,7 +139,23 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString('data-channel-field="data_type"', $view);
         $this->assertStringContainsString('data-channel-field="min_length"', $view);
         $this->assertStringContainsString('data-channel-field="max_length"', $view);
+        $this->assertStringContainsString('name="discord_webhook_enabled"', $view);
+        $this->assertStringContainsString('name="discord_webhook_url"', $view);
+        $this->assertStringContainsString("route('reachus.admin.settings.discord.test')", $view);
+        $this->assertStringContainsString('updateDiscordWebhookFields', $view);
 
+    }
+
+    public function test_discord_delivery_occurs_after_message_persistence(): void
+    {
+        $controller = file_get_contents(dirname(__DIR__, 2).'/src/Controllers/ContactController.php');
+
+        $persist = strpos($controller, '$message = ContactMessage::create');
+        $discord = strpos($controller, '$discordWebhook->notifyNewMessage($message)');
+
+        $this->assertNotFalse($persist);
+        $this->assertNotFalse($discord);
+        $this->assertLessThan($discord, $persist);
     }
 
     public function test_guest_submissions_can_be_temporarily_disabled(): void

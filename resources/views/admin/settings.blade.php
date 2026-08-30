@@ -133,6 +133,56 @@
             <div class="card reachus-admin-card mb-4">
                 <div class="reachus-admin-card-header">
                     <div class="reachus-section-heading mb-0">
+                        <span class="reachus-section-icon"><i class="bi bi-discord" aria-hidden="true"></i></span>
+                        <div>
+                            <h2>{{ trans('reachus::admin.settings.discord_webhook_title') }}</h2>
+                            <small class="text-body-secondary">{{ trans('reachus::admin.settings.discord_webhook_description') }}</small>
+                        </div>
+                    </div>
+                    <span class="badge text-bg-secondary">{{ trans('reachus::admin.settings.optional') }}</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="reachus-admin-section pt-0">
+                        <div class="reachus-setting-switch">
+                            <div>
+                                <label class="form-label fw-semibold mb-1" for="discordWebhookEnabledInput">{{ trans('reachus::admin.settings.discord_webhook_enabled') }}</label>
+                                <div class="form-text mt-0">{{ trans('reachus::admin.settings.discord_webhook_enabled_help') }}</div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input type="hidden" name="discord_webhook_enabled" value="0">
+                                <input class="form-check-input @error('discord_webhook_enabled') is-invalid @enderror" type="checkbox" role="switch" id="discordWebhookEnabledInput" name="discord_webhook_enabled" value="1" @checked(old('discord_webhook_enabled', $discordWebhookEnabled))>
+                            </div>
+                        </div>
+                        @error('discord_webhook_enabled')
+                            <span class="invalid-feedback d-block" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
+                    </div>
+
+                    <div class="reachus-admin-section" id="discordWebhookConfiguration">
+                        <label class="form-label fw-semibold" for="discordWebhookUrlInput">{{ trans('reachus::admin.settings.discord_webhook_url') }}</label>
+                        <div class="input-group @error('discord_webhook_url') has-validation @enderror">
+                            <span class="input-group-text"><i class="bi bi-link-45deg" aria-hidden="true"></i></span>
+                            <input type="url" class="form-control @error('discord_webhook_url') is-invalid @enderror" id="discordWebhookUrlInput" name="discord_webhook_url" value="{{ old('discord_webhook_url', $discordWebhookUrl) }}" maxlength="2048" placeholder="https://discord.com/api/webhooks/.../..." autocomplete="off">
+                            <button type="submit" class="btn btn-outline-secondary" formaction="{{ route('reachus.admin.settings.discord.test') }}" formmethod="POST" formnovalidate>
+                                <i class="bi bi-send-check me-1" aria-hidden="true"></i> {{ trans('reachus::admin.settings.discord_webhook_test') }}
+                            </button>
+                            @error('discord_webhook_url')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                        <div class="form-text">{{ trans('reachus::admin.settings.discord_webhook_url_help') }}</div>
+                    </div>
+
+                    <div class="alert alert-info d-flex gap-2 align-items-start mt-3 mb-0" role="alert">
+                        <i class="bi bi-shield-check mt-1" aria-hidden="true"></i>
+                        <span>{{ trans('reachus::admin.settings.discord_webhook_privacy') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card reachus-admin-card mb-4">
+                <div class="reachus-admin-card-header">
+                    <div class="reachus-section-heading mb-0">
                         <span class="reachus-section-icon"><i class="bi bi-chat-square-dots" aria-hidden="true"></i></span>
                         <div>
                             <h2>{{ trans('reachus::admin.settings.channels_title') }}</h2>
@@ -372,6 +422,9 @@
             const termsEnabled = document.getElementById('termsEnabledInput');
             const termsConfiguration = document.getElementById('termsConfiguration');
             const termsFields = termsConfiguration.querySelectorAll('input');
+            const discordWebhookEnabled = document.getElementById('discordWebhookEnabledInput');
+            const discordWebhookConfiguration = document.getElementById('discordWebhookConfiguration');
+            const discordWebhookUrl = document.getElementById('discordWebhookUrlInput');
             const channelList = document.getElementById('channelList');
             const channelTemplate = document.getElementById('channelTemplate');
             const addChannelButton = document.getElementById('addChannelButton');
@@ -397,6 +450,11 @@
                 termsFields.forEach(function (field) {
                     field.required = termsEnabled.checked;
                 });
+            }
+
+            function updateDiscordWebhookFields() {
+                discordWebhookConfiguration.hidden = ! discordWebhookEnabled.checked;
+                discordWebhookUrl.required = discordWebhookEnabled.checked;
             }
 
             function updateChannelControls() {
@@ -479,8 +537,10 @@
 
             typeSelect.addEventListener('change', updateRedirectFields);
             termsEnabled.addEventListener('change', updateTermsFields);
+            discordWebhookEnabled.addEventListener('change', updateDiscordWebhookFields);
             updateRedirectFields();
             updateTermsFields();
+            updateDiscordWebhookFields();
             renumberChannels();
             updateChannelControls();
         });

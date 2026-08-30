@@ -47,6 +47,12 @@ return [
     'notifications' => [
         'new_message' => 'New Reach Us response from :name.',
     ],
+    'webhook' => [
+        'new_message_title' => 'New contact message',
+        'new_message_description' => 'A new guest contact message was received in Reach Us.',
+        'test_title' => 'Reach Us WebHook test',
+        'test_description' => 'Discord notifications for Reach Us are configured correctly.',
+    ],
     'validation' => [
         'name_format' => 'The name may only contain letters and spaces.',
         'whatsapp_format' => 'The WhatsApp number must contain :min to :max characters: digits only, with an optional + at the beginning.',

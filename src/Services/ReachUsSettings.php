@@ -9,15 +9,29 @@ use Illuminate\Support\Facades\Route;
 class ReachUsSettings
 {
     public const RATE_LIMIT_KEY = 'reachus.rate_limit';
+
     public const SUBMISSIONS_ENABLED_KEY = 'reachus.submissions_enabled';
+
     public const AUTHENTICATED_REDIRECT_KEY = 'reachus.authenticated_redirect';
+
     public const AUTHENTICATED_REDIRECT_TYPE_KEY = 'reachus.authenticated_redirect_type';
+
     public const AUTHENTICATED_REDIRECT_VALUE_KEY = 'reachus.authenticated_redirect_value';
+
     public const TERMS_ENABLED_KEY = 'reachus.terms_enabled';
+
     public const TERMS_TEXT_KEY = 'reachus.terms_text';
+
     public const TERMS_URL_KEY = 'reachus.terms_url';
+
+    public const DISCORD_WEBHOOK_ENABLED_KEY = 'reachus.discord_webhook.enabled';
+
+    public const DISCORD_WEBHOOK_URL_KEY = 'reachus.discord_webhook.url';
+
     public const DEFAULT_RATE_LIMIT = 5;
+
     public const DEFAULT_AUTHENTICATED_REDIRECT = '/';
+
     public const DEFAULT_AUTHENTICATED_REDIRECT_TYPE = 'link';
 
     private const REDIRECT_TYPES = [
@@ -58,6 +72,18 @@ class ReachUsSettings
         return $this->termsEnabled()
             && $this->termsText() !== ''
             && self::isAllowedLink($this->termsUrl());
+    }
+
+    public function discordWebhookEnabled(): bool
+    {
+        return filter_var(setting(self::DISCORD_WEBHOOK_ENABLED_KEY, false), FILTER_VALIDATE_BOOL);
+    }
+
+    public function discordWebhookUrl(): ?string
+    {
+        $url = setting(self::DISCORD_WEBHOOK_URL_KEY);
+
+        return is_string($url) && trim($url) !== '' ? trim($url) : null;
     }
 
     public function authenticatedRedirectType(): string
