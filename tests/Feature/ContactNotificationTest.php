@@ -34,6 +34,7 @@ class ContactNotificationTest extends TestCase
 
         $message = ContactMessage::create([
             'name' => 'Guest User', 'contact_method' => 'email',
+            'contact_channel_name' => 'Email', 'contact_channel_icon' => 'bi bi-envelope',
             'contact_value' => 'guest@example.com', 'reason' => 'A question.',
         ]);
 

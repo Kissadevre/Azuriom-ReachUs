@@ -7,16 +7,19 @@ use Azuriom\Models\ActionLog;
 use Azuriom\Models\Page;
 use Azuriom\Models\Post;
 use Azuriom\Models\Setting;
+use Azuriom\Plugin\ReachUs\Services\ContactChannelService;
+use Azuriom\Plugin\ReachUs\Services\DiscordWebhookService;
 use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class SettingController extends Controller
 {
-    public function show(ReachUsSettings $settings): View
+    public function show(ReachUsSettings $settings, ContactChannelService $channels): View
     {
         return view('reachus::admin.settings', [
             'rateLimit' => $settings->rateLimit(),
@@ -24,6 +27,11 @@ class SettingController extends Controller
             'termsEnabled' => $settings->termsEnabled(),
             'termsText' => $settings->termsText(),
             'termsUrl' => $settings->termsUrl(),
+            'contactChannels' => $channels->channels(),
+            'maxContactChannels' => ContactChannelService::MAX_CHANNELS,
+            'contactDataTypes' => ContactChannelService::dataTypes(),
+            'discordWebhookEnabled' => $settings->discordWebhookEnabled(),
+            'discordWebhookUrl' => $settings->discordWebhookUrl(),
             'redirectTypes' => ReachUsSettings::redirectTypes(),
             'redirectType' => $settings->authenticatedRedirectType(),
             'redirectValue' => $settings->authenticatedRedirectValue(),
@@ -49,6 +57,32 @@ class SettingController extends Controller
                     }
                 },
             ],
+            'channels' => ['required', 'array', 'min:1', 'max:'.ContactChannelService::MAX_CHANNELS],
+            'channels.*.id' => [
+                'required', 'string', 'distinct:strict', 'max:20', 'regex:/^[a-z0-9][a-z0-9_-]*$/D',
+            ],
+            'channels.*.name' => ['required', 'string', 'max:64'],
+            'channels.*.icon' => [
+                'required', 'string', 'max:64', 'regex:/^bi bi-[a-z0-9]+(?:-[a-z0-9]+)*$/D',
+            ],
+            'channels.*.data_type' => ['required', Rule::in(ContactChannelService::dataTypes())],
+            'channels.*.min_length' => [
+                'required', 'integer', 'min:'.ContactChannelService::MIN_LENGTH,
+                'max:'.ContactChannelService::MAX_LENGTH,
+            ],
+            'channels.*.max_length' => [
+                'required', 'integer', 'min:'.ContactChannelService::MIN_LENGTH,
+                'max:'.ContactChannelService::MAX_LENGTH, 'gte:channels.*.min_length',
+            ],
+            'discord_webhook_enabled' => ['required', 'boolean'],
+            'discord_webhook_url' => [
+                'nullable', 'required_if:discord_webhook_enabled,1', 'string', 'max:2048',
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if ($value !== null && $value !== '' && ! DiscordWebhookService::isValidUrl($value)) {
+                        $fail(trans('reachus::admin.settings.discord_webhook_url_invalid'));
+                    }
+                },
+            ],
             'redirect_type' => ['required', Rule::in(ReachUsSettings::redirectTypes())],
             'redirect_link' => [
                 'required_if:redirect_type,link', 'nullable', 'string', 'max:2048',
@@ -70,6 +104,10 @@ class SettingController extends Controller
             'redirect_plugin' => [
                 'required_if:redirect_type,plugin', 'nullable', Rule::in($pluginRoutes->keys()->all()),
             ],
+        ], [
+            'channels.*.id.regex' => trans('reachus::admin.settings.channel_identifier_format'),
+            'channels.*.icon.regex' => trans('reachus::admin.settings.channel_icon_format'),
+            'channels.*.max_length.gte' => trans('reachus::admin.settings.channel_max_length_gte'),
         ]);
 
         $type = $validated['redirect_type'];
@@ -80,6 +118,14 @@ class SettingController extends Controller
             'posts' => '#',
             'plugin' => $validated['redirect_plugin'],
         };
+        $channels = collect($validated['channels'])->map(fn (array $channel) => [
+            'id' => $channel['id'],
+            'name' => trim($channel['name']),
+            'icon' => $channel['icon'],
+            'data_type' => $channel['data_type'],
+            'min_length' => (int) $channel['min_length'],
+            'max_length' => (int) $channel['max_length'],
+        ])->values()->all();
 
         Setting::updateSettings([
             ReachUsSettings::RATE_LIMIT_KEY => (int) $validated['rate_limit'],
@@ -87,6 +133,11 @@ class SettingController extends Controller
             ReachUsSettings::TERMS_ENABLED_KEY => (bool) $validated['terms_enabled'],
             ReachUsSettings::TERMS_TEXT_KEY => $validated['terms_text'] ?? '',
             ReachUsSettings::TERMS_URL_KEY => $validated['terms_url'] ?? '',
+            ContactChannelService::SETTINGS_KEY => json_encode($channels, JSON_THROW_ON_ERROR),
+            ReachUsSettings::DISCORD_WEBHOOK_ENABLED_KEY => (bool) $validated['discord_webhook_enabled'],
+            ReachUsSettings::DISCORD_WEBHOOK_URL_KEY => filled($validated['discord_webhook_url'] ?? null)
+                ? trim($validated['discord_webhook_url'])
+                : null,
             ReachUsSettings::AUTHENTICATED_REDIRECT_TYPE_KEY => $type,
             ReachUsSettings::AUTHENTICATED_REDIRECT_VALUE_KEY => $value,
             ReachUsSettings::AUTHENTICATED_REDIRECT_KEY => null,
@@ -95,6 +146,39 @@ class SettingController extends Controller
 
         return to_route('reachus.admin.settings')
             ->with('success', trans('reachus::admin.settings.updated'));
+    }
+
+    /**
+     * Verify an administrator-provided Discord webhook without saving it.
+     */
+    public function testDiscordWebhook(Request $request, DiscordWebhookService $webhook): RedirectResponse
+    {
+        $validated = $request->validate([
+            'discord_webhook_url' => [
+                'required', 'string', 'max:2048',
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if (! DiscordWebhookService::isValidUrl($value)) {
+                        $fail(trans('reachus::admin.settings.discord_webhook_url_invalid'));
+                    }
+                },
+            ],
+        ]);
+
+        try {
+            $webhook->sendTest(trim($validated['discord_webhook_url']));
+        } catch (\Throwable $exception) {
+            Log::warning('Reach Us Discord webhook test failed.', [
+                'exception' => $exception::class,
+            ]);
+
+            return to_route('reachus.admin.settings')
+                ->withInput()
+                ->with('error', trans('reachus::admin.settings.discord_webhook_test_failed'));
+        }
+
+        return to_route('reachus.admin.settings')
+            ->withInput()
+            ->with('success', trans('reachus::admin.settings.discord_webhook_test_sent'));
     }
 
     private function pluginRoutes(): Collection

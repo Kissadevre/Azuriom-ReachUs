@@ -25,16 +25,19 @@ return [
     'methods' => [
         'whatsapp' => 'WhatsApp', 'telegram' => 'Telegram', 'email' => 'Correo electrónico', 'discord' => 'Discord',
     ],
-    'contact_fields' => [
-        'whatsapp' => ['label' => 'Número de WhatsApp', 'help' => 'Introduce de 6 a 16 caracteres: solo dígitos y, opcionalmente, un + al inicio.'],
-        'telegram' => ['label' => 'Usuario de Telegram', 'help' => 'Utiliza solamente letras, números, guiones y guiones bajos.'],
-        'email' => ['label' => 'Correo electrónico', 'help' => 'Utiliza solamente letras, números, @, guiones y guiones bajos.'],
-        'discord' => ['label' => 'Usuario de Discord', 'help' => 'Utiliza solamente letras, números, guiones y guiones bajos.'],
+    'contact_types' => [
+        'whatsapp' => 'Introduce de :min a :max caracteres: solo dígitos y, opcionalmente, un + al inicio.',
+        'username' => 'Introduce de :min a :max caracteres utilizando solamente letras, números, guiones y guiones bajos.',
+        'email' => 'Introduce de :min a :max caracteres utilizando un correo válido con letras, números, @, guiones y guiones bajos.',
+        'text' => 'Introduce entre :min y :max caracteres.',
+        'alphanumeric' => 'Introduce de :min a :max caracteres utilizando solamente letras y números.',
+        'numeric' => 'Introduce de :min a :max dígitos.',
     ],
     'form' => [
         'name' => 'Nombre', 'name_help' => 'Solo letras y espacios, hasta 64 caracteres.',
         'contact_method' => 'Medio de contacto preferido', 'choose_method' => 'Selecciona un medio de contacto',
-        'contact_value' => 'Datos de contacto', 'reason' => 'Motivo de contacto',
+        'contact_value' => 'Datos de contacto', 'contact_value_for' => 'Datos de contacto de :channel',
+        'reason' => 'Motivo de contacto',
         'terms_prefix' => 'He leído y acepto la',
         'submit' => 'Enviar mensaje',
         'secure_note' => 'Tu envío está protegido por nuestros controles contra abusos.',
@@ -44,11 +47,21 @@ return [
     'notifications' => [
         'new_message' => 'Nueva respuesta de Reach Us de :name.',
     ],
+    'webhook' => [
+        'new_message_title' => 'Nuevo mensaje de contacto',
+        'new_message_description' => 'Se recibió un nuevo mensaje de contacto de un invitado en Reach Us.',
+        'test_title' => 'Prueba del WebHook de Reach Us',
+        'test_description' => 'Las notificaciones de Discord para Reach Us están configuradas correctamente.',
+    ],
     'validation' => [
         'name_format' => 'El nombre solo puede contener letras y espacios.',
-        'whatsapp_format' => 'El número de WhatsApp debe contener de 6 a 16 caracteres: solo dígitos y, opcionalmente, un + al inicio.',
+        'whatsapp_format' => 'El número de WhatsApp debe contener de :min a :max caracteres: solo dígitos y, opcionalmente, un + al inicio.',
         'username_characters' => 'El usuario solo puede contener letras, números, guiones y guiones bajos.',
         'email_characters' => 'El correo solo puede contener letras, números, @, guiones y guiones bajos.',
+        'alphanumeric_format' => 'Los datos de contacto solo pueden contener letras y números.',
+        'numeric_format' => 'Los datos de contacto solo pueden contener dígitos.',
+        'contact_min' => 'Los datos de contacto deben contener al menos :min caracteres.',
+        'contact_max' => 'Los datos de contacto no pueden contener más de :max caracteres.',
         'terms_accepted' => 'Debes aceptar los términos o la política de privacidad antes de enviar tu mensaje.',
         'attributes' => ['name' => 'nombre', 'contact_method' => 'medio de contacto', 'contact_value' => 'datos de contacto', 'reason' => 'motivo', 'terms_accepted' => 'términos y condiciones'],
     ],

@@ -14,9 +14,7 @@ return new class extends Migration
             $table->string('contact_method', 20);
             $table->string('contact_value');
             $table->text('reason');
-            $table->timestamp('read_at')->nullable();
             $table->timestamps();
-            $table->index(['read_at', 'created_at']);
         });
     }
 

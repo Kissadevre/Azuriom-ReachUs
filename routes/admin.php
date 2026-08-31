@@ -15,5 +15,7 @@ Route::middleware('can:reachus.responses')->group(function () {
 
 Route::middleware('can:reachus.settings')->group(function () {
     Route::get('/settings', [SettingController::class, 'show'])->name('settings');
+    Route::post('/settings/discord/test', [SettingController::class, 'testDiscordWebhook'])
+        ->name('settings.discord.test');
     Route::post('/settings', [SettingController::class, 'save'])->name('settings.save');
 });

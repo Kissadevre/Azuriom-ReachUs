@@ -5,15 +5,6 @@
 @include('reachus::_styles')
 
 @section('content')
-    @php
-        $methodIcons = [
-            'whatsapp' => 'bi bi-whatsapp',
-            'telegram' => 'bi bi-telegram',
-            'email' => 'bi bi-envelope',
-            'discord' => 'bi bi-discord',
-        ];
-    @endphp
-
     <div class="reachus-shell">
         <header class="reachus-admin-header">
             <div class="reachus-admin-heading">
@@ -79,8 +70,8 @@
                                 </td>
                                 <td>
                                     <span class="reachus-method-badge">
-                                        <i class="{{ $methodIcons[$message->contact_method] ?? 'bi bi-chat' }}" aria-hidden="true"></i>
-                                        {{ trans('reachus::messages.methods.'.$message->contact_method) }}
+                                        <i class="{{ $message->contact_channel_icon }}" aria-hidden="true"></i>
+                                        {{ $message->contact_channel_name }}
                                     </span>
                                 </td>
                                 <td class="text-body-secondary">{{ \Illuminate\Support\Str::limit($message->reason, 80) }}</td>

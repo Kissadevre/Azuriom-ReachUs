@@ -5,6 +5,7 @@ namespace Azuriom\Plugin\ReachUs\Providers;
 use Azuriom\Extensions\Plugin\BasePluginServiceProvider;
 use Azuriom\Models\ActionLog;
 use Azuriom\Models\Permission;
+use Azuriom\Models\Setting;
 use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -12,6 +13,14 @@ use Illuminate\Support\Facades\RateLimiter;
 
 class ReachUsServiceProvider extends BasePluginServiceProvider
 {
+    /**
+     * Register sensitive settings before Azuriom hydrates them from storage.
+     */
+    public function register(): void
+    {
+        Setting::markAsEncrypted(ReachUsSettings::DISCORD_WEBHOOK_URL_KEY);
+    }
+
     /**
      * Bootstrap the plugin services.
      */

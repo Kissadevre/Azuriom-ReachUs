@@ -2,7 +2,7 @@
 
 namespace Azuriom\Plugin\ReachUs\Requests;
 
-use Azuriom\Plugin\ReachUs\Models\ContactMessage;
+use Azuriom\Plugin\ReachUs\Services\ContactChannelService;
 use Azuriom\Plugin\ReachUs\Services\ReachUsSettings;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -21,26 +21,31 @@ class ContactRequest extends FormRequest
     public function rules(): array
     {
         $termsRequired = app(ReachUsSettings::class)->termsRequired();
+        $channelService = app(ContactChannelService::class);
+        $channelIdentifiers = $channelService->identifiers();
+        $channel = $channelService->find((string) $this->input('contact_method'));
+        $profile = $channel === null ? ContactChannelService::TYPE_TEXT : ContactChannelService::validationProfile($channel);
+        $minLength = $channel['min_length'] ?? ContactChannelService::MIN_LENGTH;
+        $maxLength = $channel['max_length'] ?? ContactChannelService::MAX_LENGTH;
 
         return [
             'name' => ['required', 'string', 'max:64', 'regex:/^[\pL\pM ]+$/u'],
-            'contact_method' => ['required', Rule::in(ContactMessage::contactMethods())],
+            'contact_method' => ['required', Rule::in($channelIdentifiers)],
             'contact_value' => [
                 'required',
                 'string',
-                'max:255',
-                Rule::when($this->input('contact_method') === ContactMessage::METHOD_EMAIL, [
+                'min:'.$minLength,
+                'max:'.$maxLength,
+                Rule::when($profile === 'email', [
                     'email:rfc',
                     'regex:/^[A-Za-z0-9@_-]+$/D',
                 ]),
-                Rule::when(in_array($this->input('contact_method'), [
-                    ContactMessage::METHOD_DISCORD,
-                    ContactMessage::METHOD_TELEGRAM,
-                ], true), ['regex:/^[A-Za-z0-9_-]+$/D']),
-                Rule::when($this->input('contact_method') === ContactMessage::METHOD_WHATSAPP, [
-                    'max:16',
-                    'regex:/^(?:[0-9]{6,16}|\+[0-9]{5,15})$/D',
+                Rule::when($profile === 'username', ['regex:/^[A-Za-z0-9_-]+$/D']),
+                Rule::when($profile === 'whatsapp', ['regex:/^\+?[0-9]+$/D']),
+                Rule::when($profile === ContactChannelService::TYPE_ALPHANUMERIC, [
+                    'regex:/^[\pL\pN]+$/uD',
                 ]),
+                Rule::when($profile === ContactChannelService::TYPE_NUMERIC, ['regex:/^[0-9]+$/D']),
             ],
             'reason' => ['required', 'string', 'max:1000'],
             'terms_accepted' => [Rule::when($termsRequired, ['required', 'accepted'])],
@@ -49,14 +54,25 @@ class ContactRequest extends FormRequest
 
     public function messages(): array
     {
+        $service = app(ContactChannelService::class);
+        $channel = $service->find((string) $this->input('contact_method'));
+        $profile = $channel === null ? ContactChannelService::TYPE_TEXT : ContactChannelService::validationProfile($channel);
+
         return [
             'name.regex' => trans('reachus::messages.validation.name_format'),
-            'contact_value.regex' => match ($this->input('contact_method')) {
-                ContactMessage::METHOD_WHATSAPP => trans('reachus::messages.validation.whatsapp_format'),
-                ContactMessage::METHOD_EMAIL => trans('reachus::messages.validation.email_characters'),
-                ContactMessage::METHOD_DISCORD, ContactMessage::METHOD_TELEGRAM => trans('reachus::messages.validation.username_characters'),
+            'contact_value.regex' => match ($profile) {
+                'whatsapp' => trans('reachus::messages.validation.whatsapp_format', [
+                    'min' => $channel['min_length'],
+                    'max' => $channel['max_length'],
+                ]),
+                'email' => trans('reachus::messages.validation.email_characters'),
+                'username' => trans('reachus::messages.validation.username_characters'),
+                ContactChannelService::TYPE_ALPHANUMERIC => trans('reachus::messages.validation.alphanumeric_format'),
+                ContactChannelService::TYPE_NUMERIC => trans('reachus::messages.validation.numeric_format'),
                 default => trans('validation.regex'),
             },
+            'contact_value.min' => trans('reachus::messages.validation.contact_min'),
+            'contact_value.max' => trans('reachus::messages.validation.contact_max'),
             'terms_accepted.accepted' => trans('reachus::messages.validation.terms_accepted'),
             'terms_accepted.required' => trans('reachus::messages.validation.terms_accepted'),
         ];

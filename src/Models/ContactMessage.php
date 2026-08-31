@@ -17,20 +17,11 @@ class ContactMessage extends Model
     protected string $prefix = 'reachus_';
 
     protected $fillable = [
-        'name', 'contact_method', 'contact_value', 'reason', 'read_at',
+        'name', 'contact_method', 'contact_channel_name', 'contact_channel_icon',
+        'contact_value', 'reason', 'read_at',
     ];
 
     protected $casts = [
         'read_at' => 'datetime',
     ];
-
-    public static function contactMethods(): array
-    {
-        return [
-            self::METHOD_WHATSAPP,
-            self::METHOD_TELEGRAM,
-            self::METHOD_EMAIL,
-            self::METHOD_DISCORD,
-        ];
-    }
 }

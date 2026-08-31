@@ -121,7 +121,7 @@
 
 .reachus-method-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
     gap: .75rem;
 }
 
@@ -507,6 +507,28 @@
     margin-left: 0;
 }
 
+.reachus-channel-list {
+    display: grid;
+    gap: .85rem;
+}
+
+.reachus-channel-item {
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .75rem;
+    background: rgba(var(--bs-secondary-rgb), .025);
+}
+
+.reachus-channel-remove {
+    display: inline-flex;
+    width: 2.4rem;
+    height: 2.4rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2rem;
+    padding: 0;
+}
+
 .reachus-destination-panel {
     border: 1px solid var(--bs-border-color);
     border-radius: .75rem;
@@ -526,7 +548,7 @@
     }
 
     .reachus-method-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
     }
 
     .reachus-submit-row,
@@ -545,6 +567,11 @@
 
     .reachus-detail-grid {
         grid-template-columns: 1fr;
+    }
+
+    .reachus-channel-remove {
+        width: 100%;
+        margin-top: 0;
     }
 }
 

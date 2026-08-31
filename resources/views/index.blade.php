@@ -6,12 +6,7 @@
 
 @section('content')
     @php
-        $methodIcons = [
-            'whatsapp' => 'bi bi-whatsapp',
-            'telegram' => 'bi bi-telegram',
-            'email' => 'bi bi-envelope',
-            'discord' => 'bi bi-discord',
-        ];
+        $methodIcons = collect($contactChannels)->pluck('icon', 'id')->all();
     @endphp
 
     <div class="reachus-shell reachus-public py-2 py-lg-4">
@@ -83,12 +78,12 @@
                                 <fieldset>
                                     <legend class="visually-hidden">{{ trans('reachus::messages.form.contact_method') }}</legend>
                                     <div class="reachus-method-grid">
-                                        @foreach(\Azuriom\Plugin\ReachUs\Models\ContactMessage::contactMethods() as $method)
+                                        @foreach($contactChannels as $channel)
                                             <div class="reachus-method-option">
-                                                <input type="radio" class="visually-hidden" id="contactMethod{{ ucfirst($method) }}" name="contact_method" value="{{ $method }}" @checked(old('contact_method') === $method) required>
-                                                <label class="reachus-method-card" for="contactMethod{{ ucfirst($method) }}">
-                                                    <i class="{{ $methodIcons[$method] }}" aria-hidden="true"></i>
-                                                    <span>{{ trans('reachus::messages.methods.'.$method) }}</span>
+                                                <input type="radio" class="visually-hidden" id="contactMethod{{ $loop->index }}" name="contact_method" value="{{ $channel['id'] }}" @checked(old('contact_method') === $channel['id']) required>
+                                                <label class="reachus-method-card" for="contactMethod{{ $loop->index }}">
+                                                    <i class="{{ $channel['icon'] }}" aria-hidden="true"></i>
+                                                    <span>{{ $channel['name'] }}</span>
                                                 </label>
                                             </div>
                                         @endforeach
@@ -178,7 +173,7 @@
             const icon = document.getElementById('contactValueIcon');
             const reason = document.getElementById('reasonInput');
             const reasonCounter = document.getElementById('reasonCounter');
-            const methods = @json(trans('reachus::messages.contact_fields'));
+            const methods = @json($contactFields);
             const icons = @json($methodIcons);
 
             function selectedMethod() {
@@ -195,18 +190,15 @@
 
                 group.hidden = ! configuration;
                 input.required = Boolean(configuration);
-                input.type = selected === 'email' ? 'email' : 'text';
-                input.inputMode = selected === 'whatsapp' ? 'tel' : (selected === 'email' ? 'email' : 'text');
-                input.maxLength = selected === 'whatsapp' ? 16 : 255;
-                input.autocomplete = selected === 'email' ? 'email' : 'off';
+                input.type = configuration?.htmlType ?? 'text';
+                input.inputMode = configuration?.inputMode ?? 'text';
+                input.minLength = configuration?.minLength ?? 0;
+                input.maxLength = configuration?.maxLength ?? 255;
+                input.autocomplete = configuration?.filter === 'email' ? 'email' : 'off';
                 input.title = configuration ? configuration.help : '';
 
-                if (selected === 'whatsapp') {
-                    input.setAttribute('pattern', '(?:[0-9]{6,16}|\\+[0-9]{5,15})');
-                } else if (selected === 'discord' || selected === 'telegram') {
-                    input.setAttribute('pattern', '[A-Za-z0-9_-]+');
-                } else if (selected === 'email') {
-                    input.setAttribute('pattern', '[A-Za-z0-9@_-]+');
+                if (configuration?.pattern) {
+                    input.setAttribute('pattern', configuration.pattern);
                 } else {
                     input.removeAttribute('pattern');
                 }
@@ -228,17 +220,21 @@
             });
 
             input.addEventListener('input', function () {
-                const selected = selectedMethod();
+                const configuration = methods[selectedMethod()];
 
-                if (selected === 'whatsapp') {
+                if (configuration?.filter === 'whatsapp') {
                     const hasLeadingPlus = input.value.startsWith('+');
                     const digits = input.value.replace(/\D/g, '');
 
-                    input.value = ((hasLeadingPlus ? '+' : '') + digits).slice(0, 16);
-                } else if (selected === 'discord' || selected === 'telegram') {
+                    input.value = ((hasLeadingPlus ? '+' : '') + digits).slice(0, input.maxLength);
+                } else if (configuration?.filter === 'username') {
                     input.value = input.value.replace(/[^A-Za-z0-9_-]/g, '');
-                } else if (selected === 'email') {
+                } else if (configuration?.filter === 'email') {
                     input.value = input.value.replace(/[^A-Za-z0-9@_-]/g, '');
+                } else if (configuration?.filter === 'alphanumeric') {
+                    input.value = input.value.replace(/[^\p{L}\p{N}]/gu, '');
+                } else if (configuration?.filter === 'numeric') {
+                    input.value = input.value.replace(/\D/g, '');
                 }
             });
 

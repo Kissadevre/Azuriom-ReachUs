@@ -36,20 +36,29 @@ class ReachUsSecurityTest extends TestCase
         );
     }
 
-    public function test_form_uses_the_shared_azuriom_captcha_element(): void
+    public function test_form_uses_only_the_native_azuriom_captcha_view(): void
     {
-        $view = file_get_contents(dirname(__DIR__, 2).'/resources/views/index.blade.php');
+        $pluginPath = dirname(__DIR__, 2);
+        $azuriomPath = dirname(__DIR__, 4);
+        $view = file_get_contents($pluginPath.'/resources/views/index.blade.php');
 
+        $this->assertFileExists($azuriomPath.'/resources/views/elements/captcha.blade.php');
+        $this->assertFileDoesNotExist($pluginPath.'/resources/views/captcha.blade.php');
+        $this->assertFileDoesNotExist($pluginPath.'/resources/views/elements/captcha.blade.php');
         $this->assertStringContainsString('id="captcha-form"', $view);
         $this->assertStringContainsString("@include('elements.captcha', ['center' => true])", $view);
         $this->assertStringContainsString("input.removeAttribute('pattern')", $view);
-        $this->assertStringContainsString("input.maxLength = selected === 'whatsapp' ? 16 : 255", $view);
-        $this->assertStringContainsString("input.setAttribute('pattern', '[A-Za-z0-9_-]+')", $view);
-        $this->assertStringContainsString("input.setAttribute('pattern', '[A-Za-z0-9@_-]+')", $view);
+        $this->assertStringContainsString('input.minLength = configuration?.minLength ?? 0', $view);
+        $this->assertStringContainsString('input.maxLength = configuration?.maxLength ?? 255', $view);
+        $this->assertStringContainsString('input.setAttribute(\'pattern\', configuration.pattern)', $view);
+        $this->assertStringContainsString("configuration?.filter === 'alphanumeric'", $view);
+        $this->assertStringContainsString("configuration?.filter === 'numeric'", $view);
         $this->assertStringContainsString('name="terms_accepted"', $view);
         $this->assertStringContainsString('@if($termsRequired)', $view);
         $this->assertStringContainsString('@if(! $submissionsEnabled)', $view);
         $this->assertStringContainsString('reachus-unavailable-state', $view);
+        $this->assertStringContainsString('@foreach($contactChannels as $channel)', $view);
+        $this->assertStringContainsString('const methods = @json($contactFields)', $view);
     }
 
     public function test_polished_views_share_isolated_styles_and_responsive_controls(): void
@@ -76,6 +85,12 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString('@media (max-width: 767.98px)', $styles);
         $this->assertStringContainsString("plugin_path('reachus/assets/css/reachus.css')", $styleLoader);
         $this->assertStringNotContainsString('plugin_asset(', $styleLoader);
+
+        foreach (array_slice($views, 2) as $responseView) {
+            $contents = file_get_contents($responseView);
+            $this->assertStringContainsString('$message->contact_channel_name', $contents);
+            $this->assertStringContainsString('$message->contact_channel_icon', $contents);
+        }
     }
 
     public function test_administration_routes_enforce_section_permissions(): void
@@ -88,11 +103,14 @@ class ReachUsSecurityTest extends TestCase
 
         $responses = $router->getRoutes()->getByName('reachus.admin.responses.index');
         $settings = $router->getRoutes()->getByName('reachus.admin.settings');
+        $discordTest = $router->getRoutes()->getByName('reachus.admin.settings.discord.test');
 
         $this->assertNotNull($responses);
         $this->assertNotNull($settings);
+        $this->assertNotNull($discordTest);
         $this->assertContains('can:reachus.responses', $responses->gatherMiddleware());
         $this->assertContains('can:reachus.settings', $settings->gatherMiddleware());
+        $this->assertContains('can:reachus.settings', $discordTest->gatherMiddleware());
     }
 
     public function test_settings_form_offers_the_navbar_style_destination_types(): void
@@ -113,6 +131,31 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString('name="terms_url"', $view);
         $this->assertStringContainsString('name="submissions_enabled"', $view);
         $this->assertStringContainsString('updateTermsFields', $view);
+        $this->assertStringContainsString('id="channelList"', $view);
+        $this->assertStringContainsString('id="channelTemplate"', $view);
+        $this->assertStringContainsString('id="addChannelButton"', $view);
+        $this->assertStringContainsString('data-channel-icon-preview', $view);
+        $this->assertStringContainsString('const maxChannels = {{ $maxContactChannels }}', $view);
+        $this->assertStringContainsString('data-channel-field="data_type"', $view);
+        $this->assertStringContainsString('data-channel-field="min_length"', $view);
+        $this->assertStringContainsString('data-channel-field="max_length"', $view);
+        $this->assertStringContainsString('name="discord_webhook_enabled"', $view);
+        $this->assertStringContainsString('name="discord_webhook_url"', $view);
+        $this->assertStringContainsString("route('reachus.admin.settings.discord.test')", $view);
+        $this->assertStringContainsString('updateDiscordWebhookFields', $view);
+
+    }
+
+    public function test_discord_delivery_occurs_after_message_persistence(): void
+    {
+        $controller = file_get_contents(dirname(__DIR__, 2).'/src/Controllers/ContactController.php');
+
+        $persist = strpos($controller, '$message = ContactMessage::create');
+        $discord = strpos($controller, '$discordWebhook->notifyNewMessage($message)');
+
+        $this->assertNotFalse($persist);
+        $this->assertNotFalse($discord);
+        $this->assertLessThan($discord, $persist);
     }
 
     public function test_guest_submissions_can_be_temporarily_disabled(): void
