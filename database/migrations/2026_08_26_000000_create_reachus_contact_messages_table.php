@@ -12,9 +12,14 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name', 64);
             $table->string('contact_method', 20);
+            $table->string('contact_channel_name', 64);
+            $table->string('contact_channel_icon', 64);
             $table->string('contact_value');
             $table->text('reason');
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
+
+            $table->index(['read_at', 'created_at']);
         });
     }
 

@@ -17,19 +17,9 @@ class ContactMessageTest extends TestCase
         ]));
     }
 
-    public function test_plugin_migrations_can_be_rolled_back_in_reverse_order(): void
+    public function test_plugin_baseline_migration_can_be_rolled_back(): void
     {
         $migrationPath = dirname(__DIR__, 2).'/database/migrations/';
-
-        (require $migrationPath.'2026_08_28_000000_add_channel_snapshot_to_reachus_contact_messages_table.php')->down();
-
-        $this->assertFalse(Schema::hasColumn('reachus_contact_messages', 'contact_channel_name'));
-        $this->assertFalse(Schema::hasColumn('reachus_contact_messages', 'contact_channel_icon'));
-
-        (require $migrationPath.'2026_08_26_000001_add_read_at_to_reachus_contact_messages_table.php')->down();
-
-        $this->assertTrue(Schema::hasTable('reachus_contact_messages'));
-        $this->assertFalse(Schema::hasColumn('reachus_contact_messages', 'read_at'));
 
         (require $migrationPath.'2026_08_26_000000_create_reachus_contact_messages_table.php')->down();
 
