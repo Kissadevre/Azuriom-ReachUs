@@ -2,6 +2,7 @@
 
 return [
     'title' => 'Reach Us',
+    'debug' => ['title' => 'Modo debug', 'enabled' => 'Activar registros de depuración', 'help' => 'Registra solicitudes, tiempos de ejecución, errores y contexto técnico durante 14 días. Las credenciales y webhooks se ocultan.'],
     'nav' => ['responses' => 'Respuestas', 'settings' => 'Configuración'],
     'permissions' => [
         'responses' => 'Ver y gestionar respuestas de Reach Us y recibir notificaciones de nuevas respuestas',

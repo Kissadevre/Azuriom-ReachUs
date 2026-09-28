@@ -2,6 +2,7 @@
 
 return [
     'title' => 'Reach Us',
+    'debug' => ['title' => 'Debug mode', 'enabled' => 'Enable debug logging', 'help' => 'Logs requests, execution time, failures, and technical context for 14 days. Credentials and webhooks are redacted.'],
     'nav' => ['responses' => 'Responses', 'settings' => 'Settings'],
     'permissions' => [
         'responses' => 'View and manage Reach Us responses and receive new response notifications',

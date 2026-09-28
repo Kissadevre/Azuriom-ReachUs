@@ -140,6 +140,7 @@ class ReachUsSecurityTest extends TestCase
         $this->assertStringContainsString('data-channel-field="min_length"', $view);
         $this->assertStringContainsString('data-channel-field="max_length"', $view);
         $this->assertStringContainsString('name="discord_webhook_enabled"', $view);
+        $this->assertStringContainsString('name="debug_enabled"', $view);
         $this->assertStringContainsString('name="discord_webhook_url"', $view);
         $this->assertStringContainsString("route('reachus.admin.settings.discord.test')", $view);
         $this->assertStringContainsString('updateDiscordWebhookFields', $view);
@@ -162,6 +163,7 @@ class ReachUsSecurityTest extends TestCase
     {
         $settings = app(ReachUsSettings::class);
 
+        $this->assertFalse($settings->debugEnabled());
         $this->assertTrue($settings->submissionsEnabled());
 
         Setting::updateSettings(ReachUsSettings::SUBMISSIONS_ENABLED_KEY, false);
