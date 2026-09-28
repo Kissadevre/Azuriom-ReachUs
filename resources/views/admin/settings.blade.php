@@ -33,6 +33,16 @@
 
         <form action="{{ route('reachus.admin.settings.save') }}" method="POST" id="reachusSettingsForm">
             @csrf
+            <div class="card mb-4">
+                <div class="card-header"><strong><i class="bi bi-bug text-warning me-2" aria-hidden="true"></i>{{ trans('reachus::admin.debug.title') }}</strong></div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between gap-4">
+                        <label for="debugEnabled" class="mb-0"><span class="d-block fw-semibold">{{ trans('reachus::admin.debug.enabled') }}</span><small class="text-body-secondary">{{ trans('reachus::admin.debug.help') }}</small></label>
+                        <div class="form-check form-switch fs-4"><input type="hidden" name="debug_enabled" value="0"><input class="form-check-input" type="checkbox" id="debugEnabled" name="debug_enabled" value="1" @checked(old('debug_enabled', $debugEnabled))></div>
+                    </div>
+                    <div class="form-text mt-3"><code>storage/logs/reachus-debug-YYYY-MM-DD.log</code></div>
+                </div>
+            </div>
 
             <div class="card reachus-admin-card mb-4">
                 <div class="reachus-admin-card-header">

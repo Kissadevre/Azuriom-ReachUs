@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Route;
 
 class ReachUsSettings
 {
+    public const DEBUG_ENABLED_KEY = 'reachus.debug_enabled';
+
     public const RATE_LIMIT_KEY = 'reachus.rate_limit';
 
     public const SUBMISSIONS_ENABLED_KEY = 'reachus.submissions_enabled';
@@ -41,6 +43,11 @@ class ReachUsSettings
     public function rateLimit(): int
     {
         return max(1, min(100, (int) setting(self::RATE_LIMIT_KEY, self::DEFAULT_RATE_LIMIT)));
+    }
+
+    public function debugEnabled(): bool
+    {
+        return filter_var(setting(self::DEBUG_ENABLED_KEY, false), FILTER_VALIDATE_BOOL);
     }
 
     public function submissionsEnabled(): bool
